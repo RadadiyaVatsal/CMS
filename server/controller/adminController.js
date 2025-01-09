@@ -6,6 +6,7 @@ import Subject from "../models/subject.js";
 import Notice from "../models/notice.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import Batch from "../models/batch.js";
 
 export const adminLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -212,6 +213,38 @@ export const createNotice = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+
+export const addBatch = async (req, res) => {
+  try {
+    const errors = { batchError: "" }; // Correctly initialize errors object
+    const { syear, eyear } = req.body;
+
+    // Find a batch with the exact match of both syear and eyear
+    const existingBatch = await Batch.findOne({ startYear: syear, endYear: eyear });
+    console.log(existingBatch);    
+    if (existingBatch) { // If a batch already exists with the same syear and eyear
+      errors.batchError = "Batch already exists";
+      return res.status(400).json(errors);
+    }
+
+    // Create a new batch if no match is found
+    const newBatch = new Batch({
+      startYear: syear,
+      endYear: eyear,
+    });
+
+    await newBatch.save();
+    return res.status(200).json({
+      success: true,
+      message: "Batch added successfully",
+      response: newBatch,
+    });
+  } catch (error) {
+    const errors = { backendError: error.message }; // Include error message for clarity
+    return res.status(500).json(errors);
+  }
+};
+
 
 export const addDepartment = async (req, res) => {
   try {
@@ -506,6 +539,21 @@ export const deleteDepartment = async (req, res) => {
   }
 };
 
+// delete batch
+
+export const deleteBatch = async (req, res) => {
+  try {
+    const { startYear , endYear } = req.body;
+
+    await Batch.findOneAndDelete({ startYear , endYear });
+
+    res.status(200).json({ message: "Batch Deleted" });
+  } catch (error) {
+    const errors = { backendError: String };
+    errors.backendError = error;
+    res.status(500).json(errors);
+  }
+};
 export const addStudent = async (req, res) => {
   try {
     const {
@@ -635,10 +683,21 @@ export const getAllAdmin = async (req, res) => {
     console.log("Backend Error", error);
   }
 };
+
 export const getAllDepartment = async (req, res) => {
   try {
     const departments = await Department.find();
     res.status(200).json(departments);
+  } catch (error) {
+    console.log("Backend Error", error);
+  }
+};
+
+
+export const getAllBatch = async (req, res) => {
+  try {
+    const batches = await Batch.find();
+    res.status(200).json(batches);
   } catch (error) {
     console.log("Backend Error", error);
   }

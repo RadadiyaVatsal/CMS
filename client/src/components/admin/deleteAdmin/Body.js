@@ -76,7 +76,7 @@ const Body = () => {
       <div className="space-y-5">
         <div className="flex text-gray-400 items-center space-x-2">
           <DeleteIcon />
-          <h1>All Students</h1>
+          <h1>All Admins</h1>
         </div>
         <div className=" mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
           <form

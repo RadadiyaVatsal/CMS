@@ -25,6 +25,9 @@ import {
   deleteSubject,
   createNotice,
   getNotice,
+  addBatch,
+  getAllBatch,
+  deleteBatch
 } from "../controller/adminController.js";
 const router = express.Router();
 
@@ -34,11 +37,13 @@ router.get("/getallstudent", auth, getAllStudent);
 router.post("/createnotice", auth, createNotice);
 router.get("/getallfaculty", auth, getAllFaculty);
 router.get("/getalldepartment", auth, getAllDepartment);
+router.get("/getallbatch", auth, getAllBatch);
 router.get("/getallsubject", auth, getAllSubject);
 router.get("/getalladmin", auth, getAllAdmin);
 router.post("/updateprofile", auth, updateAdmin);
 router.post("/addadmin", auth, addAdmin);
 router.post("/adddepartment", auth, addDepartment);
+router.post("/addbatch", auth, addBatch);
 router.post("/addfaculty", auth, addFaculty);
 router.post("/getfaculty", auth, getFaculty);
 router.post("/addsubject", auth, addSubject);
@@ -51,6 +56,7 @@ router.post("/deleteadmin", auth, deleteAdmin);
 router.post("/deletefaculty", auth, deleteFaculty);
 router.post("/deletestudent", auth, deleteStudent);
 router.post("/deletedepartment", auth, deleteDepartment);
+router.post("/deletebatch", auth, deleteBatch);
 router.post("/deletesubject", auth, deleteSubject);
 
 export default router;

@@ -42,6 +42,9 @@ import DeleteFaculty from "./components/admin/deleteFaculty/DeleteFaculty";
 import DeleteStudent from "./components/admin/deleteStudent/DeleteStudent";
 import DeleteSubject from "./components/admin/deleteSubject/DeleteSubject";
 import CreateNotice from "./components/admin/createNotice/CreateNotice";
+import AddBatch from "./components/admin/addBatch/AddBatch";
+import DeleteBatch from "./components/admin/deleteBatch/DeleteBatch";
+
 
 const App = () => {
   return (
@@ -59,6 +62,8 @@ const App = () => {
         path="/admin/updatepassword"
         element={<AdminFirstTimePassword />}
       />
+      <Route path="/admin/addbatch" element={<AddBatch/>} />
+      <Route path="/admin/deletebatch" element={<DeleteBatch/>} />
       <Route path="/admin/createnotice" element={<CreateNotice />} />
       <Route path="/admin/addadmin" element={<AddAdmin />} />
       <Route path="/admin/deleteadmin" element={<DeleteAdmin />} />

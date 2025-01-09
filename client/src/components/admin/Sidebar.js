@@ -73,6 +73,26 @@ const Sidebar = () => {
             <h1 className="font-normal">Create Notice</h1>
           </NavLink>
         </div>
+        {/* adding batch */}
+        <div className="">
+          <NavLink
+            to="/admin/addbatch"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <AddIcon className="" />
+            <h1 className="font-normal">Add Batch</h1>
+          </NavLink>
+          <NavLink
+            to="/admin/deletebatch"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <DeleteIcon className="" />
+            <h1 className="font-normal">Delete Batch</h1>
+          </NavLink>
+        </div>
+
         <div className="">
           <NavLink
             to="/admin/addadmin"

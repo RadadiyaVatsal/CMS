@@ -23,6 +23,9 @@ import {
   DELETE_SUBJECT,
   CREATE_NOTICE,
   GET_NOTICE,
+  ADD_BATCH,
+  DELETE_BATCH,
+  GET_ALL_BATCH,
 } from "../actionTypes";
 import * as api from "../api";
 
@@ -90,6 +93,15 @@ export const getAllSubject = () => async (dispatch) => {
     console.log("Redux Error", error);
   }
 };
+
+export const getAllBatch = () => async (dispatch) => {
+  try{ 
+    const {data} = await api.getAllBatch();
+    dispatch({ type: GET_ALL_BATCH, payload: data });
+  } catch (error) {
+    console.log("redux error", error);
+  }
+}
 
 export const updateAdmin = (formData) => async (dispatch) => {
   try {
@@ -162,6 +174,19 @@ export const deleteSubject = (formData) => async (dispatch) => {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
+// deleteing batch
+export const deleteBatch = (formData) => async (dispatch) => {
+  try {
+    console.log("data");
+    const { data } = await api.deleteBatch(formData);
+    alert("Batch Deleted");
+    dispatch({ type: DELETE_BATCH, payload: true });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+};
+
 export const deleteDepartment = (formData) => async (dispatch) => {
   try {
     const { data } = await api.deleteDepartment(formData);
@@ -171,6 +196,18 @@ export const deleteDepartment = (formData) => async (dispatch) => {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
+export const addBatch = (formData) => async (dispatch) => {
+  try {
+    const { data } = await api.addBatch(formData);
+     alert("Batch Added Successfully");
+     dispatch({ type : ADD_BATCH , payload : true})
+  } catch (error) {
+    alert("Failed to add batch");
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+}
+
 export const addDepartment = (formData) => async (dispatch) => {
   try {
     const { data } = await api.addDepartment(formData);
