@@ -91,7 +91,8 @@ const Body = () => {
                 )}
                 <h1 className="font-bold text-xl w-full text-center">
                   Notices
-                </h1>
+                </h1> 
+                
               </div>
               <div className="mx-5 mt-5 space-y-3 overflow-y-auto h-[12rem]">
                 {!open ? (
@@ -103,6 +104,7 @@ const Body = () => {
                       }}
                       className="">
                       <Notice idx={idx} notice={notice} notFor="faculty" />
+                      
                     </div>
                   ))
                 ) : (

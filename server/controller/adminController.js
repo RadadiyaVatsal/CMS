@@ -250,7 +250,7 @@ export const addDepartment = async (req, res) => {
   try {
     const errors = { departmentError: String };
     const { department } = req.body;
-    const existingDepartment = await Department.findOne({ department });
+    const existingDepartment = await Department.findOne({department: department.toUpperCase() });
     if (existingDepartment) {
       errors.departmentError = "Department already added";
       return res.status(400).json(errors);
@@ -265,7 +265,7 @@ export const addDepartment = async (req, res) => {
     }
 
     const newDepartment = await new Department({
-      department,
+      department : department.toUpperCase(),
       departmentCode,
     });
 
@@ -366,6 +366,7 @@ export const getFaculty = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+
 export const getNotice = async (req, res) => {
   try {
     const errors = { noNoticeError: String };
@@ -380,6 +381,23 @@ export const getNotice = async (req, res) => {
     errors.backendError = error;
     res.status(500).json(errors);
   }
+};
+
+export const deleteNotice = async (req, res) => {
+  
+    const errors = { noNoticeError: String };
+    const {notice }= req.body; 
+    
+    try{
+      const res = await Notice.findByIdAndDelete(notice);
+      //console.log(res);
+      res.status(200).json({msg : "Notice deleted successfully"})
+    } catch(error){
+      const errors = { backendError: String };
+      errors.backendError = error;
+      res.status(500).json(errors);
+    }
+    
 };
 
 export const addSubject = async (req, res) => {
@@ -563,15 +581,14 @@ export const addStudent = async (req, res) => {
       contactNumber,
       avatar,
       email,
-      section,
+      semester,
       gender,
       batch,
       fatherName,
-      motherName,
-      fatherContactNumber,
-      motherContactNumber,
-      year,
+      
+          
     } = req.body;
+    //console.log("Here in server " , req.body);
     const errors = { emailError: String };
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
@@ -600,6 +617,10 @@ export const addStudent = async (req, res) => {
     hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
 
+     //finding id of batch
+      var batchId = await Batch.findOne({startYear : batch.split('-')[0] , endYear : batch.split('-')[1]});
+      // console.log("Batch id  " , batchId);
+
     const newStudent = await new Student({
       name,
       dob,
@@ -609,23 +630,12 @@ export const addStudent = async (req, res) => {
       contactNumber,
       avatar,
       email,
-      section,
+      semester,
       gender,
-      batch,
+      batch : batchId._id,
       fatherName,
-      motherName,
-      fatherContactNumber,
-      motherContactNumber,
-      year,
       passwordUpdated,
     });
-    await newStudent.save();
-    const subjects = await Subject.find({ department, year });
-    if (subjects.length !== 0) {
-      for (var i = 0; i < subjects.length; i++) {
-        newStudent.subjects.push(subjects[i]._id);
-      }
-    }
     await newStudent.save();
     return res.status(200).json({
       success: true,
@@ -633,6 +643,7 @@ export const addStudent = async (req, res) => {
       response: newStudent,
     });
   } catch (error) {
+    console.log(error);
     const errors = { backendError: String };
     errors.backendError = error;
     res.status(500).json(errors);
@@ -641,9 +652,9 @@ export const addStudent = async (req, res) => {
 
 export const getStudent = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { department, batch, semester } = req.body;
     const errors = { noStudentError: String };
-    const students = await Student.find({ department, year });
+    const students = await Student.find({ department, batch , semester });
 
     if (students.length === 0) {
       errors.noStudentError = "No Student Found";

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
+
 const studentSchema = new Schema({
   name: {
     type: String,
@@ -17,16 +18,6 @@ const studentSchema = new Schema({
     type: String,
     required: true,
   },
-  year: {
-    type: Number,
-    required: true,
-  },
-  subjects: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "subject",
-    },
-  ],
   username: {
     type: String,
   },
@@ -36,24 +27,20 @@ const studentSchema = new Schema({
   fatherName: {
     type: String,
   },
-  motherName: {
-    type: String,
-  },
   department: {
     type: String,
     required: true,
   },
-  section: {
-    type: String,
+  semester: {
+    type: Number,
     required: true,
   },
   batch: {
-    type: String,
+    type: Schema.Types.ObjectId, // Use ObjectId type
+    ref: "batch", // Reference the Batch model
+    required: true, // Make it required if all students must belong to a batch
   },
   contactNumber: {
-    type: Number,
-  },
-  fatherContactNumber: {
     type: Number,
   },
   dob: {

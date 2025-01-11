@@ -10,11 +10,13 @@ const Body = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState({});
   const departments = useSelector((state) => state.admin.allDepartment);
+  const batches = useSelector((state) => state.admin.allBatch);
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
   const [value, setValue] = useState({
     department: "",
-    year: "",
+    batch: "",
+    semester : "",
   });
   const [search, setSearch] = useState(false);
 
@@ -70,19 +72,42 @@ const Body = () => {
                 </MenuItem>
               ))}
             </Select>
-            <label htmlFor="year">Year</label>
+
+            <label htmlFor="batch">Batch</label>
             <Select
               required
               displayEmpty
               sx={{ height: 36, width: 224 }}
               inputProps={{ "aria-label": "Without label" }}
-              value={value.year}
-              onChange={(e) => setValue({ ...value, year: e.target.value })}>
+              value={value.batch}
+              onChange={(e) =>
+                setValue({ ...value, batch: e.target.value })
+              }>
+              <MenuItem value="">None</MenuItem>
+              {batches?.map((bt, idx) => (
+                <MenuItem key={idx} value={bt._id}>
+                  {bt.startYear} - {bt.endYear}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <label htmlFor="semester">semester</label>
+            <Select
+              required
+              displayEmpty
+              sx={{ height: 36, width: 224 }}
+              inputProps={{ "aria-label": "Without label" }}
+              value={value.semester}
+              onChange={(e) => setValue({ ...value, semester: e.target.value })}>
               <MenuItem value="">None</MenuItem>
               <MenuItem value="1">1</MenuItem>
               <MenuItem value="2">2</MenuItem>
               <MenuItem value="3">3</MenuItem>
               <MenuItem value="4">4</MenuItem>
+              <MenuItem value="5">5</MenuItem>
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="7">7</MenuItem>
+              <MenuItem value="8">8</MenuItem>
             </Select>
             <button
               className={`${classes.adminFormSubmitButton} w-56`}

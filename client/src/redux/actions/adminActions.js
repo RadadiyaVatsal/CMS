@@ -23,9 +23,11 @@ import {
   DELETE_SUBJECT,
   CREATE_NOTICE,
   GET_NOTICE,
+  DELETE_NOTICE,
   ADD_BATCH,
   DELETE_BATCH,
   GET_ALL_BATCH,
+  
 } from "../actionTypes";
 import * as api from "../api";
 
@@ -279,6 +281,16 @@ export const getNotice = (formData) => async (dispatch) => {
   try {
     const { data } = await api.getNotice(formData);
     dispatch({ type: GET_NOTICE, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+};
+
+export const deleteNotice = (formData) => async (dispatch) => {
+  try {
+    const { data } = await api.deleteNotice(formData);
+    console.log(data);
+
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }

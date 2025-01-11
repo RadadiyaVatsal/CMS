@@ -35,5 +35,6 @@ export const DELETE_STUDENT = "DELETE_STUDENT";
 export const DELETE_SUBJECT = "DELETE_SUBJECT";
 export const CREATE_NOTICE = "CREATE_NOTICE";
 export const GET_NOTICE = "GET_NOTICE";
+export const DELETE_NOTICE = "DELETE_NOTICE";
 export const ADD_BATCH = "ADD_BATCH";
 export const GET_ALL_BATCH = "GET_ALL_BATCH";
