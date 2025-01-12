@@ -18,13 +18,17 @@ const subjectSchema = new Schema({
     type: Number,
     default: 10,
   },
-  year: {
-    type: String,
+  semester: {
+    type: Number,
     required: true,
   },
-  attendence: {
+  batch: {
     type: Schema.Types.ObjectId,
-    ref: "attendence",
+    ref: "batch",
+  },
+  faculty: {
+    type: Schema.Types.ObjectId,
+    ref: "faculty",
   },
 });
 

@@ -233,7 +233,8 @@ export const addFaculty = (formData) => async (dispatch) => {
 export const getFaculty = (department) => async (dispatch) => {
   try {
     const { data } = await api.getFaculty(department);
-    dispatch({ type: GET_FACULTY, payload: data });
+   
+    dispatch({ type: GET_FACULTY, payload: data.result });
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
@@ -245,6 +246,7 @@ export const addSubject = (formData) => async (dispatch) => {
     alert("Subject Added Successfully");
     dispatch({ type: ADD_SUBJECT, payload: true });
   } catch (error) {
+    console.log(error);
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };

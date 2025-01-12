@@ -7,6 +7,7 @@ import Notice from "../models/notice.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import Batch from "../models/batch.js";
+import faculty from "../models/faculty.js";
 
 export const adminLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -402,7 +403,7 @@ export const deleteNotice = async (req, res) => {
 
 export const addSubject = async (req, res) => {
   try {
-    const { totalLectures, department, subjectCode, subjectName, year } =
+    const { totalLectures, department, subjectCode, subjectName, semester , batch , faculty} =
       req.body;
     const errors = { subjectError: String };
     const subject = await Subject.findOne({ subjectCode });
@@ -416,17 +417,13 @@ export const addSubject = async (req, res) => {
       department,
       subjectCode,
       subjectName,
-      year,
+      batch,
+      faculty,
+      semester,
     });
 
     await newSubject.save();
-    const students = await Student.find({ department, year });
-    if (students.length !== 0) {
-      for (var i = 0; i < students.length; i++) {
-        students[i].subjects.push(newSubject._id);
-        await students[i].save();
-      }
-    }
+    
     return res.status(200).json({
       success: true,
       message: "Subject added successfully",
@@ -441,23 +438,36 @@ export const addSubject = async (req, res) => {
 
 export const getSubject = async (req, res) => {
   try {
-    const { department, year } = req.body;
+    const { department, semester, batch } = req.body;
 
     if (!req.userId) return res.json({ message: "Unauthenticated" });
-    const errors = { noSubjectError: String };
 
-    const subjects = await Subject.find({ department, year });
+    const errors = { noSubjectError: "" };
+
+    // Fetch subjects based on the filters
+    let subjects = await Subject.find({ department, semester, batch });
     if (subjects.length === 0) {
       errors.noSubjectError = "No Subject Found";
       return res.status(404).json(errors);
     }
-    res.status(200).json({ result: subjects });
+
+    // Use Promise.all to wait for all faculty lookups
+    const updatedSubjects = await Promise.all(
+      subjects.map(async (subject) => {
+        const faculty = await Faculty.findById(subject.faculty);
+        return { ...subject.toObject(), faculty: faculty ? faculty.name : "Unknown" };
+      })
+    );
+
+    // Send the updated subjects as the response
+    res.status(200).json({ result: updatedSubjects });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
+    const errors = { backendError: "" };
+    errors.backendError = error.message || "An error occurred";
     res.status(500).json(errors);
   }
 };
+
 
 export const getAdmin = async (req, res) => {
   try {
