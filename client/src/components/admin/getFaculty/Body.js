@@ -29,8 +29,13 @@ const Body = () => {
     setLoading(true);
     setError({});
     dispatch(getFaculty({ department }));
+    if (faculties.length == 0) {
+      setError({ noFacultyError: "No faculty found" })
+      setLoading(false);
+      setSearch(false);
+    }
   };
-  const faculties = useSelector((state) => state.admin.faculties.result);
+  const faculties = useSelector((state) => state.admin.faculties);
 
   useEffect(() => {
     if (faculties?.length !== 0) {

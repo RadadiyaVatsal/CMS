@@ -36,6 +36,7 @@ const Body = () => {
   useEffect(() => {
     dispatch(getAllDepartment());
     dispatch(getAllBatch());
+    dispatch(getFaculty(value.department));
   }, [dispatch]);
 
   useEffect(() => {
@@ -65,6 +66,11 @@ const Body = () => {
     dispatch(addSubject(value));
   };
 
+  useEffect(() => {
+    // Optional: Log or debug the `allFaculty` state
+    console.log("Faculty data updated:", allFaculty);
+  }, [allFaculty]);
+ 
   const handleDepartmentChange = (e) => {
     const selectedDepartment = e.target.value;
     setValue((prevValue) => ({
@@ -72,9 +78,11 @@ const Body = () => {
       department: selectedDepartment,
       faculty: "", // Reset faculty selection
     }));
+  
+    // Dispatch the action to fetch faculty
     dispatch(getFaculty({ department: selectedDepartment }));
   };
-
+  
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">

@@ -232,10 +232,10 @@ export const addFaculty = (formData) => async (dispatch) => {
 
 export const getFaculty = (department) => async (dispatch) => {
   try {
-    const { data } = await api.getFaculty(department);
-   
+    const { data } = await api.getFaculty(department);   
     dispatch({ type: GET_FACULTY, payload: data.result });
   } catch (error) {
+    dispatch({ type: GET_FACULTY, payload: [] })
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };

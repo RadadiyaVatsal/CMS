@@ -111,15 +111,11 @@ export const updateFaculty = async (req, res) => {
 
 export const createTest = async (req, res) => {
   try {
-    const { subjectCode, department, year, section, date, test, totalMarks } =
+    const { subject ,  date, test, totalMarks } =
       req.body;
     const errors = { testError: String };
     const existingTest = await Test.findOne({
-      subjectCode,
-      department,
-      year,
-      section,
-      test,
+      test
     });
     if (existingTest) {
       errors.testError = "Given Test is already created";
@@ -128,21 +124,13 @@ export const createTest = async (req, res) => {
 
     const newTest = await new Test({
       totalMarks,
-      section,
+      subjectCode : subject,
       test,
       date,
-      department,
-      subjectCode,
-      year,
     });
 
     await newTest.save();
-    const students = await Student.find({ department, year, section });
-    return res.status(200).json({
-      success: true,
-      message: "Test added successfully",
-      response: newTest,
-    });
+    return res.status(200).json({message: "Test created successfully"});
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
@@ -160,6 +148,28 @@ export const getTest = async (req, res) => {
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
+    res.status(500).json(errors);
+  }
+};
+
+export const getSubject = async (req, res) => {
+  try {
+    const { faculty } = req.body;
+
+    if (!req.userId) return res.json({ message: "Unauthenticated" });
+
+
+    // Fetch subjects based on the filters
+    let subjects = await Subject.find({faculty: faculty});
+    if (subjects.length === 0) {
+      errors.noSubjectError = "No Subject Found";
+      return res.status(404).json(errors);
+    }
+
+    return res.status(200).json({result : subjects})
+  } catch (error) {
+    const errors = { backendError: "" };
+    errors.backendError = error.message || "An error occurred";
     res.status(500).json(errors);
   }
 };

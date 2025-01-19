@@ -8,6 +8,7 @@ import {
   GET_STUDENT,
   MARKS_UPLOADED,
   ATTENDANCE_MARKED,
+  GET_SUBJECT,
 } from "../actionTypes";
 import * as api from "../api";
 
@@ -45,11 +46,13 @@ export const updateFaculty = (formData) => async (dispatch) => {
 
 export const createTest = (formData) => async (dispatch) => {
   try {
+    console.log("here");
     const { data } = await api.createTest(formData);
     alert("Test Created Successfully");
 
     dispatch({ type: ADD_TEST, payload: true });
   } catch (error) {
+    console.log(error);
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
@@ -57,11 +60,21 @@ export const createTest = (formData) => async (dispatch) => {
 export const getTest = (formData) => async (dispatch) => {
   try {
     const { data } = await api.getTest(formData);
-    dispatch({ type: GET_TEST, payload: data });
+    dispatch({ type: GET_TEST, payload: data.result });
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
+export const getSubject = (formData) => async (dispatch) =>{
+  try{
+    const { data} = await api.getSubjectByFaculty(formData);
+    dispatch({type : GET_SUBJECT , payload : data})
+  }catch (error){
+    console.log(error);
+    dispatch({ type: SET_ERRORS, payload: error.response });
+  }
+}
 
 export const getStudent = (formData) => async (dispatch) => {
   try {

@@ -64,8 +64,12 @@ export const getFaculty = (department) =>
 
 export const addSubject = (subject) =>
   API.post("/api/admin/addsubject", subject);
+
 export const getSubject = (subject) =>
   API.post("/api/admin/getsubject", subject);
+
+export const getSubjectByFaculty = (faculty) =>
+  API.post("/api/faculty/getsubject", faculty);
 
 export const addStudent = (student) =>
   API.post("/api/admin/addstudent", student);

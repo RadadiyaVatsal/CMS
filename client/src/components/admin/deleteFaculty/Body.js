@@ -10,6 +10,7 @@ import { DELETE_FACULTY, SET_ERRORS } from "../../../redux/actionTypes";
 const Body = () => {
   const dispatch = useDispatch();
   const departments = useSelector((state) => state.admin.allDepartment);
+  const faculties = useSelector((state) => state.admin.faculties);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
@@ -44,9 +45,10 @@ const Body = () => {
     setSearch(true);
     setLoading(true);
     setError({});
-    dispatch(getFaculty(value));
+    dispatch(getFaculty({department: value.department}));
+    
   };
-  const faculties = useSelector((state) => state.admin.faculties.result);
+ 
 
   const dltFaculty = (e) => {
     setError({});
