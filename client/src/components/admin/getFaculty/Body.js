@@ -7,6 +7,37 @@ import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import MenuItem from "@mui/material/MenuItem";
 import { SET_ERRORS } from "../../../redux/actionTypes";
+const FacultyTable = ({ faculties }) => {
+  return (
+    <div className="w-full table-auto border-collapse border border-gray-300">
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 p-2">Sr. No.</th>
+            <th className="border border-gray-300 p-2">Name</th>
+            <th className="border border-gray-300 p-2">Username</th>
+            <th className="border border-gray-300 p-2">Email</th>
+            <th className="border border-gray-300 p-2">Designation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {faculties.map((fac, idx) => (
+            <tr key={idx}>
+              <td className="border border-gray-300 p-2 text-center">
+                {idx + 1}
+              </td>
+              <td className="border border-gray-300 p-2">{fac.name}</td>
+              <td className="border border-gray-300 p-2">{fac.username}</td>
+              <td className="border border-gray-300 p-2">{fac.email}</td>
+              <td className="border border-gray-300 p-2">{fac.designation}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 const Body = () => {
   const dispatch = useDispatch();
   const [department, setDepartment] = useState("");
@@ -15,6 +46,7 @@ const Body = () => {
   const [search, setSearch] = useState(false);
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
+  const faculties = useSelector((state) => state.admin.faculties);
 
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
@@ -29,13 +61,12 @@ const Body = () => {
     setLoading(true);
     setError({});
     dispatch(getFaculty({ department }));
-    if (faculties.length == 0) {
-      setError({ noFacultyError: "No faculty found" })
+    if (faculties.length === 0) {
+      setError({ noFacultyError: "No faculty found" });
       setLoading(false);
       setSearch(false);
     }
   };
-  const faculties = useSelector((state) => state.admin.faculties);
 
   useEffect(() => {
     if (faculties?.length !== 0) {
@@ -54,7 +85,7 @@ const Body = () => {
           <EngineeringIcon />
           <h1>All Faculty</h1>
         </div>
-        <div className=" mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
+        <div className="mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
           <form
             className="flex flex-col space-y-2 col-span-1"
             onSubmit={handleSubmit}>
@@ -101,51 +132,7 @@ const Body = () => {
               !loading &&
               Object.keys(error).length === 0 &&
               faculties?.length !== 0 && (
-                <div className={classes.adminData}>
-                  <div className="grid grid-cols-12">
-                    <h1 className={`${classes.adminDataHeading} col-span-1 `}>
-                      Sr no.
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-3 `}>
-                      Name
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-2 `}>
-                      Username
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-3 `}>
-                      Email
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-3 `}>
-                      Designation
-                    </h1>
-                  </div>
-                  {faculties?.map((fac, idx) => (
-                    <div
-                      key={idx}
-                      className={`${classes.adminDataBody} grid-cols-12`}>
-                      <h1
-                        className={`${classes.adminDataBodyFields} font-bold border-0 col-span-1`}>
-                        {idx + 1}
-                      </h1>
-                      <h1
-                        className={`col-span-3 ${classes.adminDataBodyFields}`}>
-                        {fac.name}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields} `}>
-                        {fac.username}
-                      </h1>
-                      <h1
-                        className={`col-span-3 ${classes.adminDataBodyFields}`}>
-                        {fac.email}
-                      </h1>
-                      <h1
-                        className={`col-span-3 ${classes.adminDataBodyFields}`}>
-                        {fac.designation}
-                      </h1>
-                    </div>
-                  ))}
-                </div>
+                <FacultyTable faculties={faculties} />
               )}
           </div>
         </div>

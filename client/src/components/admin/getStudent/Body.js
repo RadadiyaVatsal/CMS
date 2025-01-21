@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import BoyIcon from "@mui/icons-material/Boy";
 import { useDispatch, useSelector } from "react-redux";
-import { getStudent } from "../../../redux/actions/adminActions";
+import { getAllBatch, getStudent } from "../../../redux/actions/adminActions";
 import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { SET_ERRORS } from "../../../redux/actionTypes";
+
 const Body = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState({});
@@ -16,7 +17,7 @@ const Body = () => {
   const [value, setValue] = useState({
     department: "",
     batch: "",
-    semester : "",
+    semester: "",
   });
   const [search, setSearch] = useState(false);
 
@@ -34,6 +35,7 @@ const Body = () => {
     setError({});
     dispatch(getStudent(value));
   };
+
   const students = useSelector((state) => state.admin.students.result);
 
   useEffect(() => {
@@ -44,6 +46,10 @@ const Body = () => {
     dispatch({ type: SET_ERRORS, payload: {} });
   }, []);
 
+  useEffect(() => {
+    dispatch(getAllBatch());
+  }, []);
+
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">
@@ -51,10 +57,11 @@ const Body = () => {
           <BoyIcon />
           <h1>All Students</h1>
         </div>
-        <div className=" mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
+        <div className="mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
           <form
             className="flex flex-col space-y-2 col-span-1"
-            onSubmit={handleSubmit}>
+            onSubmit={handleSubmit}
+          >
             <label htmlFor="department">Department</label>
             <Select
               required
@@ -64,7 +71,8 @@ const Body = () => {
               value={value.department}
               onChange={(e) =>
                 setValue({ ...value, department: e.target.value })
-              }>
+              }
+            >
               <MenuItem value="">None</MenuItem>
               {departments?.map((dp, idx) => (
                 <MenuItem key={idx} value={dp.department}>
@@ -80,9 +88,8 @@ const Body = () => {
               sx={{ height: 36, width: 224 }}
               inputProps={{ "aria-label": "Without label" }}
               value={value.batch}
-              onChange={(e) =>
-                setValue({ ...value, batch: e.target.value })
-              }>
+              onChange={(e) => setValue({ ...value, batch: e.target.value })}
+            >
               <MenuItem value="">None</MenuItem>
               {batches?.map((bt, idx) => (
                 <MenuItem key={idx} value={bt._id}>
@@ -91,30 +98,33 @@ const Body = () => {
               ))}
             </Select>
 
-            <label htmlFor="semester">semester</label>
+            <label htmlFor="semester">Semester</label>
             <Select
               required
               displayEmpty
               sx={{ height: 36, width: 224 }}
               inputProps={{ "aria-label": "Without label" }}
               value={value.semester}
-              onChange={(e) => setValue({ ...value, semester: e.target.value })}>
+              onChange={(e) =>
+                setValue({ ...value, semester: e.target.value })
+              }
+            >
               <MenuItem value="">None</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-              <MenuItem value="2">2</MenuItem>
-              <MenuItem value="3">3</MenuItem>
-              <MenuItem value="4">4</MenuItem>
-              <MenuItem value="5">5</MenuItem>
-              <MenuItem value="6">6</MenuItem>
-              <MenuItem value="7">7</MenuItem>
-              <MenuItem value="8">8</MenuItem>
+              {[...Array(8)].map((_, i) => (
+                <MenuItem key={i} value={i + 1}>
+                  {i + 1}
+                </MenuItem>
+              ))}
             </Select>
+
             <button
               className={`${classes.adminFormSubmitButton} w-56`}
-              type="submit">
+              type="submit"
+            >
               Search
             </button>
           </form>
+
           <div className="col-span-3 mr-6">
             <div className={classes.loadingAndError}>
               {loading && (
@@ -136,58 +146,38 @@ const Body = () => {
               !loading &&
               Object.keys(error).length === 0 &&
               students?.length !== 0 && (
-                <div className={classes.adminData}>
-                  <div className="grid grid-cols-10">
-                    <h1 className={`col-span-1 ${classes.adminDataHeading}`}>
-                      Sr no.
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Name
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Username
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Email
-                    </h1>
-                    <h1 className={`col-span-1 ${classes.adminDataHeading}`}>
-                      Section
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Batch
-                    </h1>
-                  </div>
-                  {students?.map((stu, idx) => (
-                    <div
-                      key={idx}
-                      className={`${classes.adminDataBody} grid-cols-10`}>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {idx + 1}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {stu.name}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {stu.username}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {stu.email}
-                      </h1>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {stu.section}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {stu.batch}
-                      </h1>
-                    </div>
-                  ))}
-                </div>
+                <table className="w-full table-auto border-collapse border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="border border-gray-300 p-2">Sr. No.</th>
+                      <th className="border border-gray-300 p-2">Name</th>
+                      <th className="border border-gray-300 p-2">Username</th>
+                      <th className="border border-gray-300 p-2">Email</th>
+                      <th className="border border-gray-300 p-2">Semester</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {students?.map((stu, idx) => (
+                      <tr key={idx}>
+                        <td className="border border-gray-300 p-2 text-center">
+                          {idx + 1}
+                        </td>
+                        <td className="border border-gray-300 p-2">
+                          {stu.name}
+                        </td>
+                        <td className="border border-gray-300 p-2">
+                          {stu.username}
+                        </td>
+                        <td className="border border-gray-300 p-2">
+                          {stu.email}
+                        </td>
+                        <td className="border border-gray-300 p-2 text-center">
+                          {stu.semester}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               )}
           </div>
         </div>
