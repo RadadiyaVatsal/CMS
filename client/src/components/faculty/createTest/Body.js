@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_TEST, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+// import faculty from "../../../../../server/models/faculty";
 
 const Body = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,7 @@ const Body = () => {
     totalMarks: "",
     date: "",
     subject :"",
+    faculty: "",
   });
   const subjects = useSelector((state) => state.faculty.subjects.result);
 
@@ -34,25 +36,36 @@ const Body = () => {
         totalMarks: "",
         date: "",
        subject : "",
+       faculty: "",
       });
     }
   }, [store.errors]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError({});
     setLoading(true);
-    dispatch(createTest(value));
+  
+    // Ensure faculty ID is properly set before dispatching
+    const updatedValue = {
+      ...value,
+      faculty: user.result._id,
+    };
+  
+    // console.log(updatedValue); // This should now include the faculty value
+  
+    dispatch(createTest(updatedValue));
     setLoading(false);
-    
+  
+    // Reset form values after submission
     setValue({
       test: "",
       totalMarks: "",
       date: "",
-      subject : "",
+      subject: "",
+      faculty: "", // Optional, since it's handled by the user object
     });
   };
-
+  
   useEffect(() => {
     if (store.errors || store.faculty.testAdded) {
       setLoading(false);

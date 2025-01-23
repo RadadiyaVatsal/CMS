@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import BoyIcon from "@mui/icons-material/Boy";
 import { useDispatch, useSelector } from "react-redux";
-import { getStudent, uploadMark } from "../../../redux/actions/facultyActions";
+import { getStudent, getTestMarks, uploadMark } from "../../../redux/actions/facultyActions";
 import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { MARKS_UPLOADED, SET_ERRORS } from "../../../redux/actionTypes";
 import { getTest } from "../../../redux/actions/facultyActions";
+// import faculty from "../../../../../server/models/faculty";
 const Body = () => {
   const dispatch = useDispatch();
   const user = JSON.parse(localStorage.getItem("user"));
@@ -14,22 +15,19 @@ const Body = () => {
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
-  const tests = store.faculty.tests.result;
+  const tests = store.faculty.tests;
   const [marks, setMarks] = useState([]);
 
   const [value, setValue] = useState({
-    department: "",
-    year: "",
-    section: "",
     test: "",
   });
   const [search, setSearch] = useState(false);
-
+  let data = undefined;
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
       setError(store.errors);
       setLoading(false);
-      setValue({ department: "", year: "", section: "", test: "" });
+      setValue({  test: "" });
     }
   }, [store.errors]);
 
@@ -44,21 +42,33 @@ const Body = () => {
     setMarks(newMarks);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSearch(true);
     setLoading(true);
     setError({});
-    dispatch(getStudent(value));
+
+    const updatedValue = {
+      ...value, 
+      faculty: user.result._id,
+      department: user.result.department,
+    }
+    dispatch(getStudent(updatedValue));
+   
+     data = await getTestMarks({...value});
+    
+    
+    //  console.log(data);
+    //  console.log(Array.isArray(data));
   };
   const students = useSelector((state) => state.admin.students.result);
 
   const uploadMarks = (e) => {
     setError({});
-    dispatch(
-      uploadMark(marks, value.department, value.section, value.year, value.test)
-    );
+    dispatch(uploadMark(marks, { department: user.result.department }, value.test));
+    setMarks([]); // Reset marks after upload
   };
+  
 
   useEffect(() => {
     if (students?.length !== 0) setLoading(false);
@@ -73,7 +83,7 @@ const Body = () => {
     if (store.errors || store.faculty.marksUploaded) {
       setLoading(false);
       if (store.faculty.marksUploaded) {
-        setValue({ department: "", year: "", test: "", section: "" });
+        setValue({ test: "" });
         setSearch(false);
         dispatch({ type: SET_ERRORS, payload: {} });
         dispatch({ type: MARKS_UPLOADED, payload: false });
@@ -83,11 +93,11 @@ const Body = () => {
     }
   }, [store.errors, store.faculty.marksUploaded]);
 
+
   useEffect(() => {
-    if (value.year !== "" && value.section !== "") {
-      dispatch(getTest(value));
-    }
-  }, [value.year, value.section]);
+      dispatch(getTest({faculty : user.result._id}));
+    
+  }, []);
 
   return (
     <div className="flex-[0.8] mt-3">
@@ -100,38 +110,7 @@ const Body = () => {
           <form
             className="flex flex-col space-y-2 col-span-1"
             onSubmit={handleSubmit}>
-            <label htmlFor="year">Year</label>
-            <Select
-              required
-              displayEmpty
-              sx={{ height: 36, width: 224 }}
-              inputProps={{ "aria-label": "Without label" }}
-              value={value.year}
-              onChange={(e) => setValue({ ...value, year: e.target.value })}>
-              <MenuItem value="">None</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-              <MenuItem value="2">2</MenuItem>
-              <MenuItem value="3">3</MenuItem>
-              <MenuItem value="4">4</MenuItem>
-            </Select>
-            <label htmlFor="section">Semester</label>
-            <Select
-              required
-              displayEmpty
-              sx={{ height: 36, width: 224 }}
-              inputProps={{ "aria-label": "Without label" }}
-              value={value.section}
-              onChange={(e) => setValue({ ...value, section: e.target.value })}>
-              <MenuItem value="">None</MenuItem>
-              <MenuItem value="1">1</MenuItem>
-              <MenuItem value="2">2</MenuItem>
-              <MenuItem value="3">3</MenuItem>
-              <MenuItem value="4">4</MenuItem>
-              <MenuItem value="5">5</MenuItem>
-              <MenuItem value="6">6</MenuItem>
-              <MenuItem value="7">7</MenuItem>
-              <MenuItem value="8">8</MenuItem>
-            </Select>
+            
             <label htmlFor="year">Test</label>
             <Select
               required
@@ -142,7 +121,7 @@ const Body = () => {
               onChange={(e) => setValue({ ...value, test: e.target.value })}>
               <MenuItem value="">None</MenuItem>
               {tests?.map((test, idx) => (
-                <MenuItem value={test.test} key={idx}>
+                <MenuItem value={test._id} key={idx}>
                   {test.test}
                 </MenuItem>
               ))}
@@ -187,7 +166,7 @@ const Body = () => {
                     </h1>
 
                     <h1 className={`col-span-1 ${classes.adminDataHeading}`}>
-                      Section
+                      Semester
                     </h1>
                     <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
                       Marks
@@ -212,13 +191,14 @@ const Body = () => {
 
                       <h1
                         className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {stu.section}
+                        {stu.semester}
                       </h1>
                       <input
                         onChange={(e) =>
                           handleInputChange(e.target.value, stu._id)
                         }
-                        value={stu.marks}
+                        value={(data?.find((mark) => mark?.student == stu._id))?.marks}
+
                         className="col-span-2 border-2 w-24 px-2 h-8"
                         type="text"
                       />

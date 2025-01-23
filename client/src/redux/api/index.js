@@ -111,4 +111,6 @@ export const getTestResult = (testResult) =>
   API.post("/api/student/testresult", testResult);
 export const getAttendance = (attendance) =>
   API.post("/api/student/attendance", attendance);
-   
+  
+export const getTestMarks = (data) => 
+  API.post("/api/faculty/gettestmarks", data);

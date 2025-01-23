@@ -4,6 +4,10 @@ import { useDispatch } from "react-redux";
 
 const Notice = ({ notice, notFor, setOpen }) => {
   const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("user"));
+  console.log(user);
+
+
 
   const handleDelete = async () => {
     // eslint-disable-next-line no-restricted-globals
@@ -32,9 +36,10 @@ const Notice = ({ notice, notFor, setOpen }) => {
           {notice.content}
         </p>
 
-        <button
+        {user.result.username[0] == 'A' && <button
           className="flex items-center px-4 py-2 bg-red-500 text-white font-medium text-sm rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2"
           onClick={handleDelete}
+          
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -51,7 +56,7 @@ const Notice = ({ notice, notFor, setOpen }) => {
             />
           </svg>
           Delete
-        </button>
+        </button>}
       </div>
     )
   );

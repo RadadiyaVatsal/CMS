@@ -6,6 +6,7 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 
 export const facultyLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -111,11 +112,12 @@ export const updateFaculty = async (req, res) => {
 
 export const createTest = async (req, res) => {
   try {
-    const { subject ,  date, test, totalMarks } =
-      req.body;
+    const { subject, date, test, totalMarks, faculty } = req.body;
+    // console.log(req.body);
     const errors = { testError: String };
     const existingTest = await Test.findOne({
-      test
+      test,
+      faculty
     });
     if (existingTest) {
       errors.testError = "Given Test is already created";
@@ -124,13 +126,14 @@ export const createTest = async (req, res) => {
 
     const newTest = await new Test({
       totalMarks,
-      subjectCode : subject,
+      subjectCode: subject,
       test,
       date,
+      faculty,
     });
 
     await newTest.save();
-    return res.status(200).json({message: "Test created successfully"});
+    return res.status(200).json({ message: "Test created successfully" });
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
@@ -140,9 +143,9 @@ export const createTest = async (req, res) => {
 
 export const getTest = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { faculty } = req.body;
 
-    const tests = await Test.find({ department, year, section });
+    const tests = await Test.find({ faculty });
 
     res.status(200).json({ result: tests });
   } catch (error) {
@@ -158,15 +161,16 @@ export const getSubject = async (req, res) => {
 
     if (!req.userId) return res.json({ message: "Unauthenticated" });
 
-
     // Fetch subjects based on the filters
-    let subjects = await Subject.find({faculty: faculty});
+    let subjects = await Subject.find({ faculty: mongoose.Types.ObjectId(faculty)});
+    // console.log(subjects);
+    const errors = { noSubjectError: "" };
     if (subjects.length === 0) {
       errors.noSubjectError = "No Subject Found";
       return res.status(404).json(errors);
     }
 
-    return res.status(200).json({result : subjects})
+    return res.status(200).json({ result: subjects });
   } catch (error) {
     const errors = { backendError: "" };
     errors.backendError = error.message || "An error occurred";
@@ -176,9 +180,12 @@ export const getSubject = async (req, res) => {
 
 export const getStudent = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { department, test, faculty } = req.body;
+    const testdata = await Test.findById(test);
+    const { batch, semester } = await Subject.findOne({subjectCode: testdata.subjectCode, faculty});
     const errors = { noStudentError: String };
-    const students = await Student.find({ department, year, section });
+    const students = await Student.find({ department, batch, semester });
+
     if (students.length === 0) {
       errors.noStudentError = "No Student Found";
       return res.status(404).json(errors);
@@ -192,20 +199,25 @@ export const getStudent = async (req, res) => {
   }
 };
 
+export const getTestMarks = async (req, res) => {
+  try {
+    const { test } = req.body;
+    const studentMarks = await Marks.find({exam : test});
+    res.status(200).json(studentMarks);
+  } catch (error) {
+    console.log("Error occured while fetching test marks of student");
+    res.status(500).json(error);
+  }
+}
+
 export const uploadMarks = async (req, res) => {
   try {
-    const { department, year, section, test, marks } = req.body;
-
-    const errors = { examError: String };
-    const existingTest = await Test.findOne({
-      department,
-      year,
-      section,
-      test,
-    });
+    const { test, marks } = req.body;
+    // console.log(test);
     const isAlready = await Marks.find({
-      exam: existingTest._id,
+      exam: test,
     });
+    const errors = {examError: ""};
 
     if (isAlready.length !== 0) {
       errors.examError = "You have already uploaded marks of given exam";
@@ -222,6 +234,7 @@ export const uploadMarks = async (req, res) => {
     }
     res.status(200).json({ message: "Marks uploaded successfully" });
   } catch (error) {
+    console.log("here", error);
     const errors = { backendError: String };
     errors.backendError = error;
     res.status(500).json(errors);

@@ -305,14 +305,15 @@ export const addFaculty = async (req, res) => {
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
 
-    const faculties = await Faculty.find({ department });
-    let helper;
+    const faculties = await Faculty.find({  });
+    let helper = "000";
+    let len = faculties.length + 1;
     if (faculties.length < 10) {
-      helper = "00" + faculties.length.toString();
+      helper = "00" + len.toString();
     } else if (faculties.length < 100 && faculties.length > 9) {
-      helper = "0" + faculties.length.toString();
+      helper = "0" + len.toString();
     } else {
-      helper = faculties.length.toString();
+      helper = len.toString();
     }
     var date = new Date();
     var components = ["FAC", date.getFullYear(), departmentHelper, helper];
@@ -406,7 +407,7 @@ export const addSubject = async (req, res) => {
     const { totalLectures, department, subjectCode, subjectName, semester , batch , faculty} =
       req.body;
     const errors = { subjectError: String };
-    const subject = await Subject.findOne({ subjectCode });
+    const subject = await Subject.findOne({ subjectCode, department });
     if (subject) {
       errors.subjectError = "Given Subject is already added";
       return res.status(400).json(errors);
