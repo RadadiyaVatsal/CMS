@@ -94,6 +94,8 @@ export const createTest = (test) => API.post("/api/faculty/createtest", test);
 export const getTest = (test) => API.post("/api/faculty/gettest", test);
 export const getMarksStudent = (student) =>
   API.post("/api/faculty/getstudent", student);
+export const getStudentForAttendance = (student) => 
+  API.post("/api/faculty/getstudentforattendance", student);
 export const uploadMarks = (data) => API.post("/api/faculty/uploadmarks", data);
 export const markAttendance = (data) =>
   API.post("/api/faculty/markattendance", data);

@@ -7,6 +7,7 @@ import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import student from "../models/student.js";
 
 export const facultyLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -178,6 +179,28 @@ export const getSubject = async (req, res) => {
   }
 };
 
+export const getStudentForAttendence = async (req, res) => {
+  try {
+    const { subject } = req.body;
+    const errors = { noSubject: String, noStudent: String };
+    if (!subject) {
+      errors.noSubject = "No subject found";
+      return res.status(404).json(errors);
+    }
+
+    const { batch, semester, department } = await Subject.findById(subject);
+    const students = await Student.find({ batch, semester, department });
+
+    if (!students || students.length == 0) {
+      errors.noStudent = "No students found";
+      return res.status(500).json(errors);
+    }
+    return res.status(200).json(students);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 export const getStudent = async (req, res) => {
   try {
     const { department, test, faculty } = req.body;
@@ -209,83 +232,60 @@ export const getTestMarks = async (req, res) => {
     res.status(500).json(error);
   }
 }
-
 export const uploadMarks = async (req, res) => {
   try {
-    const { test, marks } = req.body;
-    // console.log(test);
-    const isAlready = await Marks.find({
-      exam: test,
-    });
-    const errors = {examError: ""};
+    const { test, marks } = req.body; // `test` is the test ID, and `marks` is the array of marks
+    const existingMarks = await Marks.find({ exam: test }); // Fetch existing marks for this test
 
-    if (isAlready.length !== 0) {
-      errors.examError = "You have already uploaded marks of given exam";
-      return res.status(400).json(errors);
+    if (existingMarks.length !== 0) {
+      // Update marks for the existing test
+      for (let i = 0; i < marks.length; i++) {
+        await Marks.findOneAndUpdate(
+          { student: marks[i]._id, exam: test }, // Match the student and test
+          { marks: marks[i].value }, // Update marks
+          { upsert: true, new: true } // Create the document if it doesn't exist
+        );
+      }
+      return res.status(200).json({ message: "Marks updated successfully" });
+    } else {
+      // Create new marks for the test
+      for (let i = 0; i < marks.length; i++) {
+        const newMark = new Marks({
+          student: marks[i]._id,
+          exam: test,
+          marks: marks[i].value,
+        });
+        await newMark.save();
+      }
+      return res.status(200).json({ message: "Marks uploaded successfully" });
     }
-
-    for (var i = 0; i < marks.length; i++) {
-      const newMarks = await new Marks({
-        student: marks[i]._id,
-        exam: existingTest._id,
-        marks: marks[i].value,
-      });
-      await newMarks.save();
-    }
-    res.status(200).json({ message: "Marks uploaded successfully" });
   } catch (error) {
-    console.log("here", error);
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.error("Error uploading marks:", error);
+    return res.status(500).json({ backendError: error.message });
   }
 };
 
 export const markAttendance = async (req, res) => {
   try {
-    const { selectedStudents, subjectName, department, year, section } =
-      req.body;
-
-    const sub = await Subject.findOne({ subjectName });
-
-    const allStudents = await Student.find({ department, year, section });
-
-    for (let i = 0; i < allStudents.length; i++) {
-      const pre = await Attendence.findOne({
-        student: allStudents[i]._id,
-        subject: sub._id,
-      });
-      if (!pre) {
-        const attendence = new Attendence({
-          student: allStudents[i]._id,
-          subject: sub._id,
-        });
-        attendence.totalLecturesByFaculty += 1;
-        await attendence.save();
-      } else {
-        pre.totalLecturesByFaculty += 1;
-        await pre.save();
-      }
-    }
-
-    for (var a = 0; a < selectedStudents.length; a++) {
-      const pre = await Attendence.findOne({
-        student: selectedStudents[a],
-        subject: sub._id,
-      });
-      if (!pre) {
-        const attendence = new Attendence({
-          student: selectedStudents[a],
-          subject: sub._id,
+    const { subject, selectedStudents, totalStudents } = req.body;
+    // console.log(selectedStudents);
+    totalStudents.forEach(async student => {
+      if (selectedStudents.includes(student._id)) {
+        const attendance = await Attendence.create({
+          student: student._id,
+          subject: subject,
+          attended: true
         });
 
-        attendence.lectureAttended += 1;
-        await attendence.save();
-      } else {
-        pre.lectureAttended += 1;
-        await pre.save();
       }
-    }
+      else {
+        const attendance = await Attendence.create({
+          student: student._id,
+          subject: subject,
+          attended: false
+        });
+      }
+    });
     res.status(200).json({ message: "Attendance Marked successfully" });
   } catch (error) {
     const errors = { backendError: String };

@@ -96,6 +96,15 @@ export const getStudent = (formData) => async (dispatch) => {
   }
 };
 
+export const getStudentForAttendance = (subject) => async (dispatch) => {
+  try {
+    const { data } = await api.getStudentForAttendance({subject});
+    dispatch({ type: GET_STUDENT, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+};
+
 export const uploadMark =
   (marks, department, test) => async (dispatch) => {
     try {
@@ -114,15 +123,13 @@ export const uploadMark =
   };
 
 export const markAttendance =
-  (checkedValue, subjectName, department, year, section) =>
+  (checkedValue, subject, totalStudents) =>
   async (dispatch) => {
     try {
       const formData = {
         selectedStudents: checkedValue,
-        subjectName,
-        department,
-        year,
-        section,
+        subject,
+        totalStudents,
       };
       const { data } = await api.markAttendance(formData);
       alert("Attendance Marked Successfully");
