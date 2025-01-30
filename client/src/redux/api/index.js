@@ -99,6 +99,8 @@ export const getStudentForAttendance = (student) =>
 export const uploadMarks = (data) => API.post("/api/faculty/uploadmarks", data);
 export const markAttendance = (data) =>
   API.post("/api/faculty/markattendance", data);
+export const updateAttendance = (data) =>
+  API.post("/api/faculty/updateattendance", data);
 
 // Student
 export const studentSignIn = (formData) =>

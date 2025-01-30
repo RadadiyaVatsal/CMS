@@ -6,6 +6,7 @@ import {
   GET_TEST,
   LOGOUT,
   MARKS_UPLOADED,
+  UPDATE_ATTENDANCE,
   UPDATE_FACULTY,
   UPDATE_PASSWORD,
 } from "../actionTypes";
@@ -19,6 +20,7 @@ const initialState = {
   attendanceUploaded: false,
   tests: [],
   subjects: [],
+  attendance: [],
 };
 
 const facultyReducer = (state = initialState, action) => {
@@ -39,6 +41,11 @@ const facultyReducer = (state = initialState, action) => {
         ...state,
         updatedFaculty: action.payload,
       };
+    case UPDATE_ATTENDANCE: 
+      return {
+        ...state, 
+        attendance: action.payload,
+      }
     case ADD_TEST:
       return {
         ...state,

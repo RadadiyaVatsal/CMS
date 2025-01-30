@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import BoyIcon from "@mui/icons-material/Boy";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getStudentForAttendance,
   markAttendance,
+  updateAttendance,
 } from "../../../redux/actions/facultyActions";
 import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
@@ -17,6 +18,8 @@ const Body = () => {
   const subjects = useSelector((state) => state.admin.subjects?.result || []);
   const students = useSelector((state) => state.admin.students);
   const errors = useSelector((state) => state.errors);
+  let attendance = useSelector((state) => state.faculty.attendance.alreadyAdded);
+
   const attendanceUploaded = useSelector(
     (state) => state.faculty.attendanceUploaded
   );
@@ -25,6 +28,22 @@ const Body = () => {
   const [value, setValue] = useState({ subject: "" });
   const [checkedValue, setCheckedValue] = useState([]);
   const [search, setSearch] = useState(false);
+  const inputRef = useRef([]);
+  let addedStudents = [];
+
+  useEffect(() => {
+    setTimeout(() => {
+      attendance?.forEach((a, idx) => {
+        if (inputRef.current[idx]) {
+          inputRef.current[idx].checked = a.attended;
+          if (a.attended) {
+            setCheckedValue((prev) => [...prev, a.student]);
+          }
+          setLoading(false);
+        }
+      });
+    }, 0);
+  }, [attendance]);
 
   useEffect(() => {
     // Fetch subjects for the logged-in faculty
@@ -38,18 +57,55 @@ const Body = () => {
       setCheckedValue([]);
       setSearch(false);
       dispatch({ type: ATTENDANCE_MARKED, payload: false });
+      dispatch({ type: SET_ERRORS, payload: {} });
     }
   }, [attendanceUploaded, dispatch]);
 
+  // const handleInputChange = (e) => {
+  //   const studentId = e.target.value;
+  //   if (attendance.length == 0) {
+  //     setCheckedValue((prev) =>
+  //       e.target.checked
+  //         ? [...prev, studentId]
+  //         : prev.filter((id) => id !== studentId)
+  //     );
+  //   } else {
+  //     console.log(e.target.checked);
+  //     if (!e.target.checked) {
+  //       console.log(attendance)
+  //       attendance = attendance.filter((item) => item !== studentId);
+  //       console.log(attendance)
+  //     }
+  //   }
+  // // };
+  // const handleInputChange = (e) => {
+  //   const studentId = e.target.value;
+  
+  //   // If the checkbox is checked
+  //   if (e.target.checked) {
+  //     if (!attendance.includes(studentId)) {
+  //       // Add the student ID to the attendance array
+  //       attendance = [...attendance, studentId];
+  //     }
+  //   } else {
+  //     // If the checkbox is unchecked, remove the student ID from the attendance array
+  //     attendance = attendance.filter((id) => id !== studentId);
+  //   }
+  
+  //   // Update the checkedValue state
+  //   setCheckedValue(attendance);
+  // };
+  
   const handleInputChange = (e) => {
     const studentId = e.target.value;
+  
     setCheckedValue((prev) =>
       e.target.checked
         ? [...prev, studentId]
         : prev.filter((id) => id !== studentId)
     );
   };
-
+ 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!value.subject) {
@@ -60,6 +116,7 @@ const Body = () => {
     dispatch(getStudentForAttendance(value.subject))
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
+    dispatch(updateAttendance(value.subject));
   };
 
   const uploadAttendance = () => {
@@ -120,9 +177,9 @@ const Body = () => {
                   messageColor="blue"
                 />
               )}
-              {errors.noStudentError || errors.backendError ? (
+              {errors.noStudentError || errors.backendError || errors.message ? (
                 <p className="text-red-500 text-2xl font-bold">
-                  {errors.noStudentError || errors.backendError}
+                  {errors.noStudentError || errors.backendError || errors.message}
                 </p>
               ) : null}
             </div>
@@ -149,13 +206,15 @@ const Body = () => {
                   <div
                     key={student._id}
                     className={`${classes.adminDataBody} grid-cols-7`}
-                  >
+                    >
                     <input
-                      onChange={handleInputChange}
-                      value={student._id}
-                      className="col-span-1 border-2 w-16 h-4 mt-3 px-2"
-                      type="checkbox"
-                    />
+                    ref={(checkboxInput) => (inputRef.current[idx] = checkboxInput)}
+                    onChange={handleInputChange}
+                    value={student._id}
+                    className="col-span-1 border-2 w-16 h-4 mt-3 px-2"
+                    type="checkbox"
+                  />
+
                     <h1 className={`col-span-1 ${classes.adminDataBodyFields}`}>
                       {idx + 1}
                     </h1>
@@ -174,7 +233,7 @@ const Body = () => {
                   className={`${classes.adminFormSubmitButton} w-56 mt-4`}
                   onClick={uploadAttendance}
                 >
-                  Mark Attendance
+                  {attendance?.length == 0 ? "Mark Attendance" : "Update Attendance"}
                 </button>
               </div>
             )}

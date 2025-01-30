@@ -9,6 +9,8 @@ import {
   MARKS_UPLOADED,
   ATTENDANCE_MARKED,
   GET_SUBJECT,
+  ATTENDANCE_DELETED,
+  UPDATE_ATTENDANCE,
 } from "../actionTypes";
 import * as api from "../api";
 
@@ -23,6 +25,7 @@ export const facultySignIn = (formData, navigate) => async (dispatch) => {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
 
 export const facultyUpdatePassword =
   (formData, navigate) => async (dispatch) => {
@@ -118,7 +121,7 @@ export const uploadMark =
       alert("Marks Uploaded Successfully");
       dispatch({ type: MARKS_UPLOADED, payload: true });
     } catch (error) {
-      dispatch({ type: SET_ERRORS, payload: error.response.data });
+      dispatch({ type: SET_ERRORS, payload: error.message });
     }
   };
 
@@ -138,3 +141,12 @@ export const markAttendance =
       dispatch({ type: SET_ERRORS, payload: error.response.data });
     }
   };
+
+export const updateAttendance = (subject) => async (dispatch) => {
+  try {
+    const { data } = await api.updateAttendance({subject});
+    dispatch({ type: UPDATE_ATTENDANCE, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+}

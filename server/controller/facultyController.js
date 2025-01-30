@@ -265,31 +265,76 @@ export const uploadMarks = async (req, res) => {
   }
 };
 
+export const updateAttendance = async (req, res) => {
+  try {
+    const { subject } = req.body;
+    // Get the current date's start and end (to filter records by date only)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to start of the day (00:00:00)
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to end of the day (23:59:59)
+
+    const alreadyAdded = await Attendence.find({
+      subject,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    });
+
+    if (!alreadyAdded) {
+      return res.status(400).json({  });
+    }
+
+    return res.status(200).json({alreadyAdded});
+
+  } catch (error) {
+    return res.status(404).json({error});
+  }
+}
+
 export const markAttendance = async (req, res) => {
   try {
     const { subject, selectedStudents, totalStudents } = req.body;
-    // console.log(selectedStudents);
-    totalStudents.forEach(async student => {
-      if (selectedStudents.includes(student._id)) {
-        const attendance = await Attendence.create({
-          student: student._id,
-          subject: subject,
-          attended: true
-        });
 
-      }
-      else {
-        const attendance = await Attendence.create({
-          student: student._id,
-          subject: subject,
-          attended: false
-        });
-      }
+    // Get the current date's start and end (to filter records by date only)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to start of the day (00:00:00)
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to end of the day (23:59:59)
+
+    // Check if attendance is already marked for this subject today
+    const alreadyAdded = await Attendence.findOne({
+      subject,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
     });
-    res.status(200).json({ message: "Attendance Marked successfully" });
+
+    console.log(selectedStudents);
+
+    if (alreadyAdded) {
+      for (const student of totalStudents) {
+        const val = selectedStudents.includes(student._id);
+        
+        const res = await Attendence.updateOne(
+          { student: student._id, subject: subject }, // Filter criteria
+          { $set: { attended: val } }, // Update operation
+          { new: true, runValidators: true }
+        );
+      }
+      return res.status(200).json({ message: "Attendance updated." });
+    }
+
+    // Mark attendance for each student
+    for (const student of totalStudents) {
+      const attended = selectedStudents.includes(student._id);
+      await Attendence.create({
+        student: student._id,
+        subject: subject,
+        attended: attended
+      });
+    }
+
+    res.status(200).json({ message: "Attendance marked successfully." });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };

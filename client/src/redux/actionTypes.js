@@ -38,3 +38,4 @@ export const GET_NOTICE = "GET_NOTICE";
 export const DELETE_NOTICE = "DELETE_NOTICE";
 export const ADD_BATCH = "ADD_BATCH";
 export const GET_ALL_BATCH = "GET_ALL_BATCH";
+export const UPDATE_ATTENDANCE = "UPDATE_ATTENDANCE";
