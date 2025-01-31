@@ -13,9 +13,7 @@ const Attendance = () => {
   useEffect(() => {
     dispatch(
       getAttendance(
-        user.result.department,
-        user.result.year,
-        user.result.section
+        user.result._id
       )
     );
   }, [dispatch]);

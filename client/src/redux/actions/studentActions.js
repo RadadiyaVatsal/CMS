@@ -65,14 +65,9 @@ export const getTestResult =
   };
 
 export const getAttendance =
-  (department, year, section) => async (dispatch) => {
+  (studentId) => async (dispatch) => {
     try {
-      const formData = {
-        department,
-        year,
-        section,
-      };
-      const { data } = await api.getAttendance(formData);
+      const { data } = await api.getAttendance({studentId});
       dispatch({ type: ATTENDANCE, payload: data });
     } catch (error) {
       dispatch({ type: SET_ERRORS, payload: error.response.data });

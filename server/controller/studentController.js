@@ -171,30 +171,39 @@ export const testResult = async (req, res) => {
 
 export const attendance = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { studentId } = req.body;
     const errors = { notestError: String };
-    const student = await Student.findOne({ department, year, section });
+    let subjectSet = new Set();
+    let attendedLec = {};
 
-    const attendence = await Attendence.find({
-      student: student._id,
+    const attendenceData = await Attendence.find({
+      student: studentId,
     }).populate("subject");
-    if (!attendence) {
+
+    if (!attendenceData) {
       res.status(400).json({ message: "Attendence not found" });
     }
 
+    attendenceData.forEach(a => {
+      if (!subjectSet.has(a.subject.subjectCode)) {
+        subjectSet.add(a.subject.subjectCode);
+        attendedLec[a.subject.subjectCode] = [0, 0];
+      }
+      if (subjectSet.has(a.subject.subjectCode) && a.attended) {
+        attendedLec[a.subject.subjectCode][0] += 1;
+      }
+      attendedLec[a.subject.subjectCode][1] += 1
+    });
+    const unique = attendenceData.reduce((acc, obj) => {
+      if (!acc.some(item => item.subjectCode === obj.subject.subjectCode)) {
+        acc.push({subjectCode: obj.subject.subjectCode, subjectName: obj.subject.subjectName, percentage: (attendedLec[obj.subject.subjectCode][1]/attendedLec[obj.subject.subjectCode][0])*100});
+      }
+      return acc;
+    }, []);
+    
     res.status(200).json({
-      result: attendence.map((att) => {
-        let res = {};
-        res.percentage = (
-          (att.lectureAttended / att.totalLecturesByFaculty) *
-          100
-        ).toFixed(2);
-        res.subjectCode = att.subject.subjectCode;
-        res.subjectName = att.subject.subjectName;
-        res.attended = att.lectureAttended;
-        res.total = att.totalLecturesByFaculty;
-        return res;
-      }),
+      result: unique,
+      attendedLec,
     });
   } catch (error) {
     res.status(500).json(error);
