@@ -44,6 +44,7 @@ import DeleteSubject from "./components/admin/deleteSubject/DeleteSubject";
 import CreateNotice from "./components/admin/createNotice/CreateNotice";
 import AddBatch from "./components/admin/addBatch/AddBatch";
 import DeleteBatch from "./components/admin/deleteBatch/DeleteBatch";
+import BatchManagement from "./components/admin/BatchManagement/BatchManagement";
 
 
 const App = () => {
@@ -63,6 +64,7 @@ const App = () => {
         element={<AdminFirstTimePassword />}
       />
       <Route path="/admin/addbatch" element={<AddBatch/>} />
+        <Route path="/admin/manage-batch" element={<BatchManagement/>} />
       <Route path="/admin/deletebatch" element={<DeleteBatch/>} />
       <Route path="/admin/createnotice" element={<CreateNotice />} />
       <Route path="/admin/addadmin" element={<AddAdmin />} />

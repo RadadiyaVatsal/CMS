@@ -352,20 +352,25 @@ export const addFaculty = async (req, res) => {
   }
 };
 
+
 export const getFaculty = async (req, res) => {
   try {
     const { department } = req.body;
-    const errors = { noFacultyError: String };
-    const faculties = await Faculty.find({ department });
-    if (faculties.length === 0) {
-      errors.noFacultyError = "No Faculty Found";
-      return res.status(404).json(errors);
+    let faculties;
+
+    if (department) {
+      faculties = await Faculty.find({ department });
+    } else {
+      faculties = await Faculty.find(); // Fetch all faculties if no department is specified
     }
+
+    if (faculties.length === 0) {
+      return res.status(404).json({ noFacultyError: "No Faculty Found" });
+    }
+
     res.status(200).json({ result: faculties });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
 
@@ -505,22 +510,28 @@ export const deleteAdmin = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+
+
 export const deleteFaculty = async (req, res) => {
   try {
-    const faculties = req.body;
-    const errors = { noFacultyError: String };
-    for (var i = 0; i < faculties.length; i++) {
-      var faculty = faculties[i];
+    const { facultyId } = req.body; // Expecting facultyId from URL params
 
-      await Faculty.findOneAndDelete({ _id: faculty });
+    if (!facultyId) {
+      return res.status(400).json({ error: "Faculty ID is required" });
     }
-    res.status(200).json({ message: "Faculty Deleted" });
+
+    const deletedFaculty = await Faculty.findByIdAndDelete(facultyId);
+
+    if (!deletedFaculty) {
+      return res.status(404).json({ error: "Faculty not found" });
+    }
+
+    res.status(200).json({ message: "Faculty deleted successfully" });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 export const deleteStudent = async (req, res) => {
   try {
     const students = req.body;

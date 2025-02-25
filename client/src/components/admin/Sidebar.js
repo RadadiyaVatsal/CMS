@@ -10,6 +10,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { useDispatch } from "react-redux";
 import decode from "jwt-decode";
 import { setRef } from "@mui/material";
+// import BatchManagement from "./BatchManagement";
 const isNotActiveStyle =
   "flex items-center px-5 gap-3 text-gray-500 hover:text-black transition-all duration-200 ease-in-out capitalize hover:bg-gray-200 py-2 my-1";
 const isActiveStyle =
@@ -82,6 +83,14 @@ const Sidebar = () => {
             }>
             <AddIcon className="" />
             <h1 className="font-normal">Add Batch</h1>
+          </NavLink>
+          <NavLink
+            to="/admin/manage-batch"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <AddIcon className="" />
+            <h1 className="font-normal">Manage Batch</h1>
           </NavLink>
           <NavLink
             to="/admin/deletebatch"

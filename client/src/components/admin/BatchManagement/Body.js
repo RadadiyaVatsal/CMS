@@ -50,13 +50,13 @@ const Body = () => {
   };
 
   return (
-    <div className="p-5 bg-white rounded-xl shadow-md w-[80%] mx-auto mt-5">
-      <h1 className="text-xl font-bold text-gray-700 mb-4 text-center">Batch Management</h1>
+    <div className="p-5 bg-white rounded-xl shadow-md w-[90%] mx-auto mt-5">
+      <h1 className="text-xl font-bold text-gray-700 mb-4">Batch Management</h1>
 
       {/* Show Add Form Above Table When Button Clicked */}
       {showForm && (
-        <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4 w-[60%] mx-auto">
-          <h2 className="text-lg font-semibold mb-2 text-center">Add New Batch</h2>
+        <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
+          <h2 className="text-lg font-semibold mb-2">Add New Batch</h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="number"
@@ -76,7 +76,7 @@ const Body = () => {
               placeholder="End Year"
               className="w-full p-2 border rounded"
             />
-            <div className="flex justify-center space-x-4">
+            <div className="flex space-x-4">
               <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
                 Submit
               </button>
@@ -93,8 +93,8 @@ const Body = () => {
       )}
 
       {/* Batch Table */}
-      <div className="overflow-x-auto w-[70%] mx-auto">
-        <table className="w-full bg-white border border-gray-200">
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr className="bg-gray-100">
               <th className="px-4 py-2 text-left">Start Year</th>
@@ -139,4 +139,3 @@ const Body = () => {
 };
 
 export default Body;
-
