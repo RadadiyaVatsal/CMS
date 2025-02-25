@@ -27,6 +27,10 @@ const Body = () => {
   }, [store.errors]);
 
   const handleDelete = (batch) => {
+    if (!window.confirm(`Are you sure you want to delete the batch ${batch.startYear}-${batch.endYear}?`)) {
+      return;
+    }
+  
     setLoading(true);
     dispatch(deleteBatch({ startYear: batch.startYear, endYear: batch.endYear }))
       .then(() => {
@@ -35,7 +39,7 @@ const Body = () => {
       })
       .catch(() => setLoading(false));
   };
-
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);

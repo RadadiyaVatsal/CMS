@@ -1,193 +1,86 @@
-import React, { useEffect, useState } from "react";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getAdmin, deleteAdmin } from "../../../redux/actions/adminActions";
-import { MenuItem, Select } from "@mui/material";
-import Spinner from "../../../utils/Spinner";
-import * as classes from "../../../utils/styles";
-import { DELETE_ADMIN, SET_ERRORS } from "../../../redux/actionTypes";
+import { Trash2 } from "lucide-react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Body = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const departments = useSelector((state) => state.admin.allDepartment);
-  const [error, setError] = useState({});
-  const [loading, setLoading] = useState(false);
-  const store = useSelector((state) => state);
-  const [checkedValue, setCheckedValue] = useState([]);
 
-  const [value, setValue] = useState({
-    department: "",
-  });
-  const [search, setSearch] = useState(false);
+  // Get admin data from Redux store (Fix: Properly access `result`)
+  const admins = useSelector((state) => state.admin.admins?.result || []);
+  const loading = useSelector((state) => state.admin.loading);
 
   useEffect(() => {
-    if (Object.keys(store.errors).length !== 0) {
-      setError(store.errors);
-      setLoading(false);
+    dispatch(getAdmin({})); // Fetch admins from Redux action
+  }, [dispatch]);
+
+  const handleDelete = async (adminId) => {
+    if (window.confirm("Are you sure you want to delete this admin?")) {
+      try {
+        await dispatch(deleteAdmin({ adminId }));
+        toast.success("Admin deleted successfully");
+        dispatch(getAdmin({})); // Refresh the admin list after deletion
+      } catch (error) {
+        console.error("Error deleting admin:", error);
+        toast.error("Failed to delete admin");
+      }
     }
-  }, [store.errors]);
-
-  const handleInputChange = (e) => {
-    const tempCheck = checkedValue;
-    let index;
-    if (e.target.checked) {
-      tempCheck.push(e.target.value);
-    } else {
-      index = tempCheck.indexOf(e.target.value);
-      tempCheck.splice(index, 1);
-    }
-    setCheckedValue(tempCheck);
   };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSearch(true);
-    setLoading(true);
-    setError({});
-    dispatch(getAdmin(value));
-  };
-  const students = useSelector((state) => state.admin.students.result);
-
-  const dltAdmin = (e) => {
-    setError({});
-    setLoading(true);
-    dispatch(deleteAdmin(checkedValue));
-  };
-
-  useEffect(() => {
-    if (store.admin.adminDeleted) {
-      setValue({ department: "", year: "" });
-      setLoading(false);
-      setSearch(false);
-      dispatch({ type: DELETE_ADMIN, payload: false });
-    }
-  }, [store.admin.adminDeleted]);
-
-  useEffect(() => {
-    if (students?.length !== 0) setLoading(false);
-  }, [students]);
-
-  useEffect(() => {
-    dispatch({ type: SET_ERRORS, payload: {} });
-  }, []);
 
   return (
-    <div className="flex-[0.8] mt-3">
-      <div className="space-y-5">
-        <div className="flex text-gray-400 items-center space-x-2">
-          <DeleteIcon />
-          <h1>All Admins</h1>
-        </div>
-        <div className=" mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
-          <form
-            className="flex flex-col space-y-2 col-span-1"
-            onSubmit={handleSubmit}>
-            <label htmlFor="department">Department</label>
-            <Select
-              required
-              displayEmpty
-              sx={{ height: 36, width: 224 }}
-              inputProps={{ "aria-label": "Without label" }}
-              value={value.department}
-              onChange={(e) =>
-                setValue({ ...value, department: e.target.value })
-              }>
-              <MenuItem value="">None</MenuItem>
-              {departments?.map((dp, idx) => (
-                <MenuItem key={idx} value={dp.department}>
-                  {dp.department}
-                </MenuItem>
-              ))}
-            </Select>
+    <div className="p-6">
+      {/* Header Section */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">Admin Management</h2>
+        <button
+          onClick={() => navigate("/admin/addadmin")}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Add Admin
+        </button>
+      </div>
 
-            <button
-              className={`${classes.adminFormSubmitButton} w-56`}
-              type="submit">
-              Search
-            </button>
-          </form>
-          <div className="col-span-3 mr-6">
-            <div className={classes.loadingAndError}>
-              {loading && (
-                <Spinner
-                  message="Loading"
-                  height={50}
-                  width={150}
-                  color="#111111"
-                  messageColor="blue"
-                />
-              )}
-              {(error.noAdminError || error.backendError) && (
-                <p className="text-red-500 text-2xl font-bold">
-                  {error.noAdminError || error.backendError}
-                </p>
-              )}
-            </div>
-            {search &&
-              !loading &&
-              Object.keys(error).length === 0 &&
-              students?.length !== 0 && (
-                <div className={`${classes.adminData} h-[20rem]`}>
-                  <div className="grid grid-cols-8">
-                    <h1 className={`col-span-1 ${classes.adminDataHeading}`}>
-                      Select
-                    </h1>
-                    <h1 className={`col-span-1 ${classes.adminDataHeading}`}>
-                      Sr no.
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Name
-                    </h1>
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Username
-                    </h1>
-
-                    <h1 className={`col-span-2 ${classes.adminDataHeading}`}>
-                      Email
-                    </h1>
-                  </div>
-                  {students?.map((adm, idx) => (
-                    <div
-                      key={idx}
-                      className={`${classes.adminDataBody} grid-cols-8`}>
-                      <input
-                        onChange={handleInputChange}
-                        value={adm._id}
-                        className="col-span-1 border-2 w-16 h-4 mt-3 px-2 "
-                        type="checkbox"
-                      />
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {idx + 1}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {adm.name}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {adm.username}
-                      </h1>
-
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {adm.email}
-                      </h1>
-                    </div>
-                  ))}
-                </div>
-              )}
-            {search && Object.keys(error).length === 0 && (
-              <div className="space-x-3 flex items-center justify-center mt-5">
-                <button
-                  onClick={dltAdmin}
-                  className={`${classes.adminFormSubmitButton} bg-blue-500`}>
-                  Delete
-                </button>
-              </div>
-            )}{" "}
-          </div>
-        </div>
+      {/* Table Section */}
+      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2">Name</th>
+              <th className="border border-gray-300 p-2">Email</th>
+              <th className="border border-gray-300 p-2">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="3" className="text-center py-4">Loading...</td>
+              </tr>
+            ) : admins.length > 0 ? (
+              admins.map((admin) => (
+                <tr key={admin._id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 p-2">{admin.name}</td>
+                  <td className="border border-gray-300 p-2">{admin.email}</td>
+                  <td className="border border-gray-300 p-2 text-center">
+                    <button
+                      onClick={() => handleDelete(admin._id)}
+                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="text-center py-4">No admins found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

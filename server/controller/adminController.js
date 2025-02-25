@@ -222,7 +222,7 @@ export const addBatch = async (req, res) => {
 
     // Find a batch with the exact match of both syear and eyear
     const existingBatch = await Batch.findOne({ startYear: syear, endYear: eyear });
-    console.log(existingBatch);    
+    // console.log(existingBatch);    
     if (existingBatch) { // If a batch already exists with the same syear and eyear
       errors.batchError = "Batch already exists";
       return res.status(400).json(errors);
@@ -478,7 +478,11 @@ export const getSubject = async (req, res) => {
 export const getAdmin = async (req, res) => {
   try {
     const { department } = req.body;
-
+     if(!department){
+      const admins = await Admin.find({});
+      
+       return res.status(200).json({ result: admins });
+     }
     const errors = { noAdminError: String };
 
     const admins = await Admin.find({ department });
@@ -496,18 +500,16 @@ export const getAdmin = async (req, res) => {
 
 export const deleteAdmin = async (req, res) => {
   try {
-    const admins = req.body;
-    const errors = { noAdminError: String };
-    for (var i = 0; i < admins.length; i++) {
-      var admin = admins[i];
+    const {adminId} = req.body;
 
-      await Admin.findOneAndDelete({ _id: admin });
-    }
-    res.status(200).json({ message: "Admin Deleted" });
+
+      await Admin.findByIdAndDelete(adminId);
+     return res.status(200).json({ message: "Admin Deleted" });
+   
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
-    res.status(500).json(errors);
+    return res.status(500).json(errors);
   }
 };
 

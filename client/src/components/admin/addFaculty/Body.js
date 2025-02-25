@@ -8,6 +8,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_FACULTY, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const Body = () => {
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
@@ -33,13 +36,20 @@ const Body = () => {
     }
   }, [store.errors]);
 
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     setError({});
     setLoading(true);
     dispatch(addFaculty(value));
-  };
 
+  };
+  useEffect(() => {
+    if (store.admin.facultyAdded) {
+      navigate("/admin/allfaculty");
+    }
+  }, [store.admin.facultyAdded, navigate]);
+  
   useEffect(() => {
     if (store.errors || store.admin.facultyAdded) {
       setLoading(false);

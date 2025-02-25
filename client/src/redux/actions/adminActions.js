@@ -27,6 +27,7 @@ import {
   ADD_BATCH,
   DELETE_BATCH,
   GET_ALL_BATCH,
+  GET_ADMIN,
   
 } from "../actionTypes";
 import * as api from "../api";
@@ -135,7 +136,7 @@ export const createNotice = (formData) => async (dispatch) => {
 export const getAdmin = (formData) => async (dispatch) => {
   try {
     const { data } = await api.getAdmin(formData);
-    dispatch({ type: GET_STUDENT, payload: data });
+    dispatch({ type: GET_ADMIN, payload: data });
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }

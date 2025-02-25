@@ -8,7 +8,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { ADD_ADMIN, SET_ERRORS } from "../../../redux/actionTypes";
-
+import { getAllDepartment } from "../../../redux/api";
+import { useNavigate } from "react-router-dom";
 const Body = () => {
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
@@ -30,7 +31,12 @@ const Body = () => {
       setValue({ ...value, email: "" });
     }
   }, [store.errors]);
-
+const navigate=useNavigate();
+ useEffect(() => {
+    if (store.admin.adminAdded) {
+      navigate("/admin/deleteadmin");
+    }
+  }, [store.admin.adminAdded, navigate]);
   const handleSubmit = (e) => {
     e.preventDefault();
     setError({});
@@ -64,7 +70,7 @@ const Body = () => {
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
   }, []);
-
+  
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">

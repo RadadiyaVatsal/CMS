@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import DeleteIcon from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
 import { getFaculty, deleteFaculty } from "../../../redux/actions/adminActions";
-import Select from "@mui/material/Select";
+import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
-import MenuItem from "@mui/material/MenuItem";
-import { SET_ERRORS } from "../../../redux/actionTypes";
 
 const FacultyTable = ({ faculties, handleDelete }) => {
   return (
@@ -51,16 +51,15 @@ const FacultyTable = ({ faculties, handleDelete }) => {
 
 const Body = () => {
   const dispatch = useDispatch();
-  const [department, setDepartment] = useState("");
-  const [error, setError] = useState({});
-  const departments = useSelector((state) => state.admin.allDepartment);
-  const [loading, setLoading] = useState(false);
-  const store = useSelector((state) => state);
+  const navigate = useNavigate();
   const faculties = useSelector((state) => state.admin.faculties);
+  const departments = useSelector((state) => state.admin.allDepartment);
   const [filteredFaculties, setFilteredFaculties] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
 
   useEffect(() => {
-    dispatch(getFaculty({})); // Fetch all faculties
+    dispatch(getFaculty({}));
   }, [dispatch]);
 
   useEffect(() => {
@@ -70,76 +69,84 @@ const Body = () => {
     }
   }, [faculties]);
 
-  useEffect(() => {
-    if (Object.keys(store.errors).length !== 0) {
-      setError(store.errors);
+  
+  const handleDelete = async (facultyId) => {
+    if (!window.confirm("Are you sure you want to delete?")) {
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      await dispatch(deleteFaculty({ facultyId }));
+      
+      // Fetch updated faculties from backend
+      await dispatch(getFaculty({ department: selectedDepartment || "" }));
+  
+      // Ensure filteredFaculties updates only after Redux store is updated
+      setFilteredFaculties(
+        faculties.filter((fac) => fac._id !== facultyId)
+      );
+    } catch (error) {
+      console.error("Error deleting faculty:", error);
+    } finally {
       setLoading(false);
     }
-  }, [store.errors]);
-
-  useEffect(() => {
-    dispatch({ type: SET_ERRORS, payload: {} });
-  }, []);
-
-  const handleDepartmentChange = (e) => {
-    const selectedDepartment = e.target.value;
-    setDepartment(selectedDepartment);
-    setLoading(true);
-    dispatch(getFaculty({ department: selectedDepartment }));
   };
 
-  const handleDelete = (facultyId) => {
+  const handleDepartmentChange = async (event) => {
+    const department = event.target.value;
+    setSelectedDepartment(department);
     setLoading(true);
-    dispatch(deleteFaculty({facultyId : facultyId}))
-      .then(() => dispatch(getFaculty({ department })))
-      .finally(() => setLoading(false));
+  
+    // Fetch new faculty data from backend
+    await dispatch(getFaculty({ department: department || "" }));
+  
+    // Ensure filteredFaculties updates only after Redux state is updated
+    setFilteredFaculties((prev) => {
+      const updatedFaculties = faculties.filter((fac) => fac.department === department);
+      return updatedFaculties.length ? updatedFaculties : []; // If no faculties, set empty array
+    });
+  
+    setLoading(false);
   };
-
+  
+  
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">
         <div className="flex text-gray-400 items-center space-x-2">
           <EngineeringIcon />
           <h1>All Faculty</h1>
+          <button
+            className="ml-auto bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={() => {
+              navigate("/admin/addfaculty");
+              dispatch(getFaculty({}));
+            }}
+          >
+            <AddIcon /> Add New Faculty
+          </button>
         </div>
-        <div className="mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
-          <div className="flex flex-col space-y-2 col-span-1">
-            <label htmlFor="department">Department</label>
-            <Select
-              displayEmpty
-              sx={{ height: 36, width: 224 }}
-              inputProps={{ "aria-label": "Without label" }}
-              value={department}
-              onChange={handleDepartmentChange}>
-              <MenuItem value="">None</MenuItem>
-              {departments?.map((dp, idx) => (
-                <MenuItem key={idx} value={dp.department}>{dp.department}</MenuItem>
-              ))}
-            </Select>
-          </div>
-          <div className="col-span-3 mr-6">
-            <div className={classes.loadingAndError}>
-              {loading && (
-                <Spinner
-                  message="Loading"
-                  height={50}
-                  width={150}
-                  color="#111111"
-                  messageColor="blue"
-                />
-              )}
-              {(error.noFacultyError || error.backendError) && (
-                <p className="text-red-500 text-2xl font-bold">
-                  {error.noFacultyError || error.backendError}
-                </p>
-              )}
-            </div>
 
-            {!loading && Object.keys(error).length === 0 && (
-              <FacultyTable faculties={filteredFaculties} handleDelete={handleDelete} />
-            )}
-          </div>
+        <div className="flex space-x-4 items-center">
+          <label htmlFor="department">Department:</label>
+          <Select
+            value={selectedDepartment}
+            onChange={handleDepartmentChange}
+            displayEmpty
+            sx={{ height: 36, width: 224 }}
+          >
+            <MenuItem value="">All Departments</MenuItem>
+            {departments?.map((dp, idx) => (
+              <MenuItem key={idx} value={dp.department}>
+                {dp.department}
+              </MenuItem>
+            ))}
+          </Select>
         </div>
+
+        {loading ? <Spinner /> : <FacultyTable faculties={filteredFaculties} handleDelete={handleDelete} />}
       </div>
     </div>
   );
