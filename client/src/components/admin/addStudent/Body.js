@@ -2,14 +2,16 @@ import React, { useEffect, useState, useRef } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
 import FileBase from "react-file-base64";
-import { addStudent, getAllBatch} from "../../../redux/actions/adminActions";
+import { addStudent, getAllBatch } from "../../../redux/actions/adminActions";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_STUDENT, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+import { useNavigate } from "react-router-dom";
 
 const Body = () => {
+  const navigate=useNavigate();
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
   const departments = useSelector((state) => state.admin.allDepartment);
@@ -30,7 +32,11 @@ const Body = () => {
     fatherName: "",
     semester: "",
   });
-
+ useEffect(() => {
+    if (store.admin.studentAdded) {
+      navigate("/admin/allstudent");
+    }
+  }, [store.admin.studentAdded, navigate]);
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
       setError(store.errors);
@@ -40,9 +46,9 @@ const Body = () => {
   }, [store.errors]);
 
   useEffect(() => {
-    dispatch(getAllBatch()); 
+    dispatch(getAllBatch());
   }, [dispatch]);
-  
+
   const handleSubmit = (e) => {
     //console.log(value);
     e.preventDefault();
@@ -82,10 +88,7 @@ const Body = () => {
 
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
-    
   }, []);
-
-  
 
   return (
     <div className="flex-[0.8] mt-3">
@@ -97,7 +100,8 @@ const Body = () => {
         <div className="mr-10 bg-white flex flex-col rounded-xl">
           <form
             className={`${classes.adminForm0} scrollbar-thin scrollbar-track-white scrollbar-thumb-black overflow-y-scroll h-[30rem]`}
-            onSubmit={handleSubmit}>
+            onSubmit={handleSubmit}
+          >
             <div className={classes.adminForm1}>
               {/* Left Column */}
               <div className={classes.adminForm2l}>
@@ -150,21 +154,24 @@ const Body = () => {
                     value={value.batch}
                     onChange={(e) =>
                       setValue({ ...value, batch: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     {batches && batches.length > 0 ? (
-                    batches.map((bt) => (
-                      <MenuItem key={bt._id} value={`${bt.startYear}-${bt.endYear}`}>
-                           {`${bt.startYear}-${bt.endYear}`}
+                      batches.map((bt) => (
+                        <MenuItem
+                          key={bt._id}
+                          value={`${bt.startYear}-${bt.endYear}`}
+                        >
+                          {`${bt.startYear}-${bt.endYear}`}
                         </MenuItem>
-                       ))
-                        ) : (
+                      ))
+                    ) : (
                       <MenuItem disabled>No Batches Available</MenuItem>
-                      )}
-
+                    )}
                   </Select>
                 </div>
-               
+
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Semester :</h1>
                   <Select
@@ -175,7 +182,8 @@ const Body = () => {
                     value={value.semester}
                     onChange={(e) =>
                       setValue({ ...value, semester: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     <MenuItem value="1">1</MenuItem>
                     <MenuItem value="2">2</MenuItem>
@@ -187,7 +195,7 @@ const Body = () => {
                     <MenuItem value="8">8</MenuItem>
                   </Select>
                 </div>
-                
+
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Father's Name :</h1>
                   <input
@@ -215,7 +223,8 @@ const Body = () => {
                     value={value.department}
                     onChange={(e) =>
                       setValue({ ...value, department: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     {departments?.map((dp) => (
                       <MenuItem key={dp.id} value={dp.department}>
@@ -234,7 +243,8 @@ const Body = () => {
                     value={value.gender}
                     onChange={(e) =>
                       setValue({ ...value, gender: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     <MenuItem value="Male">Male</MenuItem>
                     <MenuItem value="Female">Female</MenuItem>
@@ -269,7 +279,8 @@ const Body = () => {
                 <div className={classes.adminFormButton}>
                   <button
                     className={classes.adminFormSubmitButton}
-                    type="submit">
+                    type="submit"
+                  >
                     Submit
                   </button>
                   <button
@@ -293,8 +304,16 @@ const Body = () => {
                       setError({});
                     }}
                     className={classes.adminFormClearButton}
-                    type="button">
+                    type="button"
+                  >
                     Clear
+                  </button>
+                  <button
+                    onClick={() => navigate("/admin/allstudent")}
+                    className={classes.adminFormClearButton} // Change this if needed
+                    type="button"
+                  >
+                    Back
                   </button>
                 </div>
               </div>

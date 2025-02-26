@@ -42,14 +42,13 @@ const Body = () => {
     setError({});
     setLoading(true);
     dispatch(addFaculty(value));
-
   };
   useEffect(() => {
     if (store.admin.facultyAdded) {
       navigate("/admin/allfaculty");
     }
   }, [store.admin.facultyAdded, navigate]);
-  
+
   useEffect(() => {
     if (store.errors || store.admin.facultyAdded) {
       setLoading(false);
@@ -156,7 +155,8 @@ const Body = () => {
                     value={value.department}
                     onChange={(e) =>
                       setValue({ ...value, department: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     {departments?.map((dp, idx) => (
                       <MenuItem key={idx} value={dp.department}>
@@ -175,7 +175,8 @@ const Body = () => {
                     value={value.gender}
                     onChange={(e) =>
                       setValue({ ...value, gender: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     <MenuItem value="Male">Male</MenuItem>
                     <MenuItem value="Female">Female</MenuItem>
@@ -229,8 +230,16 @@ const Body = () => {
                   setError({});
                 }}
                 className={classes.adminFormClearButton}
-                type="button">
+                type="button"
+              >
                 Clear
+              </button>
+              <button
+                onClick={() => navigate("/admin/allfaculty")}
+                className={classes.adminFormClearButton}
+                type="button"
+              >
+                Back
               </button>
             </div>
             <div className={classes.loadingAndError}>

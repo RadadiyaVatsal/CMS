@@ -7,8 +7,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_SUBJECT, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+import { useNavigate } from "react-router-dom";
 
 const Body = () => {
+  const navigate=useNavigate();
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
   const departments = useSelector((state) => state.admin.allDepartment);
@@ -26,7 +28,11 @@ const Body = () => {
     batch: "",
     faculty: "",
   });
-
+  useEffect(() => {
+     if (store.admin.subjectAdded) {
+       navigate("/admin/allsubject");
+     }
+   }, [store.admin.subjectAdded, navigate]);
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
       setError(store.errors); // Capture errors from Redux store
@@ -240,6 +246,13 @@ const Body = () => {
               >
                 Clear
               </button>
+               <button
+                                  onClick={() => navigate("/admin/allsubject")}
+                                  className={classes.adminFormClearButton} // Change this if needed
+                                  type="button"
+                                >
+                                  Back
+                                </button>
             </div>
             <div className={classes.loadingAndError}>
               {loading && (

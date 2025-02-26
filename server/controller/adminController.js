@@ -441,7 +441,46 @@ export const addSubject = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+// export const getAllSubject = async (req, res) => {
+//   try {
+//     const subjects = await Subject.find();
+//     res.status(200).json(subjects);
+//   } catch (error) {
+//     console.log("Backend Error", error);
+//   }
+// };
 
+// export const getSubject = async (req, res) => {
+//   try {
+//     const { department, semester, batch } = req.body;
+
+//     if (!req.userId) return res.json({ message: "Unauthenticated" });
+
+//     const errors = { noSubjectError: "" };
+
+//     // Fetch subjects based on the filters
+//     let subjects = await Subject.find({ department, semester, batch });
+//     if (subjects.length === 0) {
+//       errors.noSubjectError = "No Subject Found";
+//       return res.status(404).json(errors);
+//     }
+
+//     // Use Promise.all to wait for all faculty lookups
+//     const updatedSubjects = await Promise.all(
+//       subjects.map(async (subject) => {
+//         const faculty = await Faculty.findById(subject.faculty);
+//         return { ...subject.toObject(), faculty: faculty ? faculty.name : "Unknown" };
+//       })
+//     );
+
+//     // Send the updated subjects as the response
+//     res.status(200).json({ result: updatedSubjects });
+//   } catch (error) {
+//     const errors = { backendError: "" };
+//     errors.backendError = error.message || "An error occurred";
+//     res.status(500).json(errors);
+//   }
+// };
 export const getSubject = async (req, res) => {
   try {
     const { department, semester, batch } = req.body;
@@ -457,11 +496,18 @@ export const getSubject = async (req, res) => {
       return res.status(404).json(errors);
     }
 
-    // Use Promise.all to wait for all faculty lookups
+    // Use Promise.all to wait for all faculty and batch lookups
     const updatedSubjects = await Promise.all(
       subjects.map(async (subject) => {
         const faculty = await Faculty.findById(subject.faculty);
-        return { ...subject.toObject(), faculty: faculty ? faculty.name : "Unknown" };
+        const batchData = await Batch.findById(subject.batch);
+
+        return {
+          ...subject.toObject(),
+          faculty: faculty ? faculty.name : "Unknown",
+          batchId: batchData ? batchData._id : null,
+          batchName: batchData ? `${batchData.startYear} - ${batchData.endYear}` : "Unknown",
+        };
       })
     );
 
@@ -471,6 +517,30 @@ export const getSubject = async (req, res) => {
     const errors = { backendError: "" };
     errors.backendError = error.message || "An error occurred";
     res.status(500).json(errors);
+  }
+};
+
+export const getAllSubject = async (req, res) => {
+  try {
+    const subjects = await Subject.find();
+
+    // Use Promise.all to populate batch details
+    const updatedSubjects = await Promise.all(
+      subjects.map(async (subject) => {
+        const batchData = await Batch.findById(subject.batch);
+
+        return {
+          ...subject.toObject(),
+          batchId: batchData ? batchData._id : null,
+          batchName: batchData ? `${batchData.startYear} - ${batchData.endYear}` : "Unknown",
+        };
+      })
+    );
+
+    res.status(200).json(updatedSubjects);
+  } catch (error) {
+    console.log("Backend Error", error);
+    res.status(500).json({ error: "An error occurred" });
   }
 };
 
@@ -536,13 +606,11 @@ export const deleteFaculty = async (req, res) => {
 
 export const deleteStudent = async (req, res) => {
   try {
-    const students = req.body;
-    const errors = { noStudentError: String };
-    for (var i = 0; i < students.length; i++) {
-      var student = students[i];
+    const {studentId} = req.body;
+  
 
-      await Student.findOneAndDelete({ _id: student });
-    }
+      await Student.findByIdAndDelete(studentId);
+    
     res.status(200).json({ message: "Student Deleted" });
   } catch (error) {
     const errors = { backendError: String };
@@ -552,13 +620,10 @@ export const deleteStudent = async (req, res) => {
 };
 export const deleteSubject = async (req, res) => {
   try {
-    const subjects = req.body;
-    const errors = { noSubjectError: String };
-    for (var i = 0; i < subjects.length; i++) {
-      var subject = subjects[i];
+    const {subjectId} = req.body;
 
-      await Subject.findOneAndDelete({ _id: subject });
-    }
+      await Subject.findByIdAndDelete(subjectId);
+    
     res.status(200).json({ message: "Subject Deleted" });
   } catch (error) {
     const errors = { backendError: String };
@@ -677,29 +742,62 @@ export const addStudent = async (req, res) => {
 export const getStudent = async (req, res) => {
   try {
     const { department, batch, semester } = req.body;
-    const errors = { noStudentError: String };
-    const students = await Student.find({ department, batch , semester });
+    const errors = { noStudentError: "" };
 
-    if (students.length === 0) {
+    // Build the query dynamically to include only provided filters
+    const query = {};
+    if (department) query.department = department;
+    if (batch) query.batch = batch;
+    if (semester) query.semester = semester;
+
+    // Populate the batch field to return batch name and ID
+    const students = await Student.find(query).populate({
+      path: "batch",
+      select: "startYear endYear", // Fetch only necessary fields
+    });
+
+    // Transform the batch field to include batchId and formatted batch name
+    const formattedStudents = students.map((stu) => ({
+      ...stu._doc,
+      batchId: stu.batch._id, // Send batchId
+      batchName: `${stu.batch.startYear} - ${stu.batch.endYear}`, // Send batch name
+    }));
+
+    if (formattedStudents.length === 0) {
       errors.noStudentError = "No Student Found";
       return res.status(404).json(errors);
     }
 
-    res.status(200).json({ result: students });
+    res.status(200).json({ result: formattedStudents });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
+
 export const getAllStudent = async (req, res) => {
   try {
-    const students = await Student.find();
-    res.status(200).json(students);
+    // Fetch all students with populated batch details
+    const students = await Student.find().populate({
+      path: "batch",
+      select: "startYear endYear", // Fetch only necessary fields
+    });
+
+    // Modify response to include batchId and batchName
+    const formattedStudents = students.map((stu) => ({
+      ...stu.toObject(),
+      batchId: stu.batch._id, // Send batchId
+      batchName: `${stu.batch.startYear} - ${stu.batch.endYear}`, // Send batch name
+    }));
+
+    res.status(200).json(formattedStudents);
   } catch (error) {
     console.log("Backend Error", error);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
+
 
 export const getAllFaculty = async (req, res) => {
   try {
@@ -737,11 +835,4 @@ export const getAllBatch = async (req, res) => {
     console.log("Backend Error", error);
   }
 };
-export const getAllSubject = async (req, res) => {
-  try {
-    const subjects = await Subject.find();
-    res.status(200).json(subjects);
-  } catch (error) {
-    console.log("Backend Error", error);
-  }
-};
+

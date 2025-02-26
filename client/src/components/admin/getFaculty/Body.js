@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
 import { getFaculty, deleteFaculty } from "../../../redux/actions/adminActions";
@@ -9,7 +10,7 @@ import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 
-const FacultyTable = ({ faculties, handleDelete }) => {
+const FacultyTable = ({ faculties, handleDelete, handleView }) => {
   return (
     <div className="w-full table-auto border-collapse border border-gray-300">
       <table className="w-full border-collapse">
@@ -17,9 +18,6 @@ const FacultyTable = ({ faculties, handleDelete }) => {
           <tr className="bg-gray-100">
             <th className="border border-gray-300 p-2">Sr. No.</th>
             <th className="border border-gray-300 p-2">Name</th>
-            <th className="border border-gray-300 p-2">Username</th>
-            <th className="border border-gray-300 p-2">Email</th>
-            <th className="border border-gray-300 p-2">Designation</th>
             <th className="border border-gray-300 p-2">Department</th>
             <th className="border border-gray-300 p-2">Actions</th>
           </tr>
@@ -29,11 +27,14 @@ const FacultyTable = ({ faculties, handleDelete }) => {
             <tr key={idx}>
               <td className="border border-gray-300 p-2 text-center">{idx + 1}</td>
               <td className="border border-gray-300 p-2">{fac.name}</td>
-              <td className="border border-gray-300 p-2">{fac.username}</td>
-              <td className="border border-gray-300 p-2">{fac.email}</td>
-              <td className="border border-gray-300 p-2">{fac.designation}</td>
               <td className="border border-gray-300 p-2">{fac.department}</td>
               <td className="border border-gray-300 p-2 text-center">
+                <button
+                  onClick={() => handleView(fac)}
+                  className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 mr-2"
+                >
+                  <VisibilityIcon fontSize="small" />
+                </button>
                 <button
                   onClick={() => handleDelete(fac._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -49,6 +50,29 @@ const FacultyTable = ({ faculties, handleDelete }) => {
   );
 };
 
+const FacultyDetails = ({ faculty, onClose }) => {
+  return (
+    <div className="p-5 border rounded-lg shadow-lg bg-white w-1/3 mx-auto">
+      <h2 className="text-xl font-bold mb-3">Faculty Details</h2>
+      <p><strong>Name:</strong> {faculty.name}</p>
+      <p><strong>Username:</strong> {faculty.username}</p>
+      <p><strong>Email:</strong> {faculty.email}</p>
+      <p><strong>Designation:</strong> {faculty.designation}</p>
+      <p><strong>Department:</strong> {faculty.department}</p>
+      <p><strong>DOB:</strong> {faculty.dob}</p>
+      <p><strong>Gender:</strong> {faculty.gender}</p>
+      <p><strong>Contact number:</strong> {faculty.contactNumber}</p>
+      <p><strong>Joining Year:</strong> {faculty.joiningYear}</p>
+      <button 
+        onClick={onClose} 
+        className="mt-3 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700"
+      >
+        Close
+      </button>
+    </div>
+  );
+};
+
 const Body = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -57,6 +81,7 @@ const Body = () => {
   const [filteredFaculties, setFilteredFaculties] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedFaculty, setSelectedFaculty] = useState(null);
 
   useEffect(() => {
     dispatch(getFaculty({}));
@@ -69,24 +94,15 @@ const Body = () => {
     }
   }, [faculties]);
 
-  
   const handleDelete = async (facultyId) => {
     if (!window.confirm("Are you sure you want to delete?")) {
       return;
     }
-  
     setLoading(true);
-  
     try {
       await dispatch(deleteFaculty({ facultyId }));
-      
-      // Fetch updated faculties from backend
       await dispatch(getFaculty({ department: selectedDepartment || "" }));
-  
-      // Ensure filteredFaculties updates only after Redux store is updated
-      setFilteredFaculties(
-        faculties.filter((fac) => fac._id !== facultyId)
-      );
+      setFilteredFaculties(faculties.filter((fac) => fac._id !== facultyId));
     } catch (error) {
       console.error("Error deleting faculty:", error);
     } finally {
@@ -94,24 +110,23 @@ const Body = () => {
     }
   };
 
+  const handleView = (faculty) => {
+    setSelectedFaculty(faculty);
+  };
+
+  const handleClose = () => {
+    setSelectedFaculty(null);
+  };
+
   const handleDepartmentChange = async (event) => {
     const department = event.target.value;
     setSelectedDepartment(department);
     setLoading(true);
-  
-    // Fetch new faculty data from backend
     await dispatch(getFaculty({ department: department || "" }));
-  
-    // Ensure filteredFaculties updates only after Redux state is updated
-    setFilteredFaculties((prev) => {
-      const updatedFaculties = faculties.filter((fac) => fac.department === department);
-      return updatedFaculties.length ? updatedFaculties : []; // If no faculties, set empty array
-    });
-  
+    setFilteredFaculties(faculties.filter((fac) => fac.department === department));
     setLoading(false);
   };
-  
-  
+
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">
@@ -128,7 +143,7 @@ const Body = () => {
             <AddIcon /> Add New Faculty
           </button>
         </div>
-
+        
         <div className="flex space-x-4 items-center">
           <label htmlFor="department">Department:</label>
           <Select
@@ -146,7 +161,11 @@ const Body = () => {
           </Select>
         </div>
 
-        {loading ? <Spinner /> : <FacultyTable faculties={filteredFaculties} handleDelete={handleDelete} />}
+        {loading ? <Spinner /> : 
+          selectedFaculty ? 
+            <FacultyDetails faculty={selectedFaculty} onClose={handleClose} /> 
+          : <FacultyTable faculties={filteredFaculties} handleDelete={handleDelete} handleView={handleView} />
+        }
       </div>
     </div>
   );
