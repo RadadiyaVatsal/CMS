@@ -1,15 +1,15 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import AddAdmin from "./components/admin/addAdmin/AddAdmin";
-import AddDepartment from "./components/admin/addDepartment/AddDepartment";
+import AddDepartment from "./components/admin/manageDepartment/ManageDepartment";
 import AddFaculty from "./components/admin/addFaculty/AddFaculty";
 import AddStudent from "./components/admin/addStudent/AddStudent";
 import AddSubject from "./components/admin/addSubject/AddSubject";
 import AdminHome from "./components/admin/AdminHome";
 
-import GetFaculty from "./components/admin/getFaculty/GetFaculty";
-import GetStudent from "./components/admin/getStudent/GetStudent";
-import GetSubject from "./components/admin/getSubject/GetSubject";
+import GetFaculty from "./components/admin/getFaculty/ManageFaculty";
+import GetStudent from "./components/admin/manageStudent/ManageStudent";
+import GetSubject from "./components/admin/manageSubject/ManageSubject";
 import AdminProfile from "./components/admin/profile/Profile";
 import AdminFirstTimePassword from "./components/admin/profile/update/firstTimePassword/FirstTimePassword";
 import AdminPassword from "./components/admin/profile/update/password/Password";
@@ -36,12 +36,20 @@ import StudentPassword from "./components/student/profile/update/password/Passwo
 import SubjectList from "./components/student/subjectList/SubjectList";
 import TestResult from "./components/student/testResult/TestResult";
 import Attendance from "./components/student/attendance/Attendance";
-import DeleteAdmin from "./components/admin/deleteAdmin/DeleteAdmin";
 import DeleteDepartment from "./components/admin/deleteDepartment/DeleteDepartment";
 import DeleteFaculty from "./components/admin/deleteFaculty/DeleteFaculty";
 import DeleteStudent from "./components/admin/deleteStudent/DeleteStudent";
 import DeleteSubject from "./components/admin/deleteSubject/DeleteSubject";
 import CreateNotice from "./components/admin/createNotice/CreateNotice";
+import AddBatch from "./components/admin/addBatch/AddBatch";
+import DeleteBatch from "./components/admin/deleteBatch/DeleteBatch";
+import BatchManagement from "./components/admin/BatchManagement/BatchManagement";
+import ManageAdmin from "./components/admin/manageAdmin/ManageAdmin";
+import ManageDepartment from "./components/admin/manageDepartment/ManageDepartment";
+import ManageFaculty from "./components/admin/getFaculty/ManageFaculty";
+import ManageStudent from "./components/admin/manageStudent/ManageStudent";
+import ManageSubject from "./components/admin/manageSubject/ManageSubject";
+
 
 const App = () => {
   return (
@@ -59,20 +67,23 @@ const App = () => {
         path="/admin/updatepassword"
         element={<AdminFirstTimePassword />}
       />
+      <Route path="/admin/addbatch" element={<AddBatch/>} />
+        <Route path="/admin/manage-batch" element={<BatchManagement/>} />
+      <Route path="/admin/deletebatch" element={<DeleteBatch/>} />
       <Route path="/admin/createnotice" element={<CreateNotice />} />
       <Route path="/admin/addadmin" element={<AddAdmin />} />
-      <Route path="/admin/deleteadmin" element={<DeleteAdmin />} />
-      <Route path="/admin/adddepartment" element={<AddDepartment />} />
-      <Route path="/admin/deletedepartment" element={<DeleteDepartment />} />
+      <Route path="/admin/manageadmin" element={<ManageAdmin />} />
+      <Route path="/admin/managedepartment" element={<ManageDepartment />} />
+      {/* <Route path="/admin/deletedepartment" element={<DeleteDepartment />} /> */}
       <Route path="/admin/addfaculty" element={<AddFaculty />} />
       <Route path="/admin/deletefaculty" element={<DeleteFaculty />} />
       <Route path="/admin/deletestudent" element={<DeleteStudent />} />
       <Route path="/admin/deletesubject" element={<DeleteSubject />} />
-      <Route path="/admin/allfaculty" element={<GetFaculty />} />
+      <Route path="/admin/managefaculty" element={<ManageFaculty />} />
       <Route path="/admin/addstudent" element={<AddStudent />} />
       <Route path="/admin/addsubject" element={<AddSubject />} />
-      <Route path="/admin/allsubject" element={<GetSubject />} />
-      <Route path="/admin/allstudent" element={<GetStudent />} />
+      <Route path="/admin/managesubject" element={<ManageSubject />} />
+      <Route path="/admin/managestudent" element={<ManageStudent />} />
 
       {/* Faculty  */}
 

@@ -24,6 +24,9 @@ import {
   DELETE_SUBJECT,
   CREATE_NOTICE,
   GET_NOTICE,
+  ADD_BATCH,
+  DELETE_BATCH,
+  GET_ALL_BATCH,
 } from "../actionTypes";
 
 const initialState = {
@@ -45,8 +48,11 @@ const initialState = {
   subjects: [],
   admins: [],
   notices: [],
+  allBatch: [],
+  batchAdded: false,
   adminDeleted: false,
   departmentDeleted: false,
+  batchDeleted: false,
   facultyDeleted: false,
   studentDeleted: false,
   subjectDeleted: false,
@@ -91,6 +97,11 @@ const adminReducer = (state = initialState, action) => {
         ...state,
         departmentDeleted: action.payload,
       };
+    case DELETE_BATCH:
+      return {
+        ...state,
+        batchDeleted: action.payload,
+      };
     case DELETE_FACULTY:
       return {
         ...state,
@@ -105,6 +116,11 @@ const adminReducer = (state = initialState, action) => {
       return {
         ...state,
         subjectDeleted: action.payload,
+      };
+    case ADD_BATCH:
+      return {
+        ...state,
+        batchAdded: action.payload,
       };
     case ADD_DEPARTMENT:
       return {
@@ -146,6 +162,11 @@ const adminReducer = (state = initialState, action) => {
         ...state,
         allDepartment: action.payload,
       };
+    case GET_ALL_BATCH:
+      return {
+        ...state,
+        allBatch: action.payload,
+      }
     case ADD_SUBJECT:
       return {
         ...state,

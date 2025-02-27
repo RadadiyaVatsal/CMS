@@ -27,6 +27,7 @@ export const getAllAdmin = () => API.get("/api/admin/getalladmin");
 
 export const getAllDepartment = () => API.get("/api/admin/getalldepartment");
 export const getAllSubject = () => API.get("/api/admin/getallsubject");
+export const getAllBatch = () => API.get("/api/admin/getallbatch");
 
 export const updateAdmin = (updatedAdmin) =>
   API.post("/api/admin/updateprofile", updatedAdmin);
@@ -43,11 +44,17 @@ export const deleteSubject = (data) =>
   API.post("/api/admin/deletesubject", data);
 export const deleteDepartment = (data) =>
   API.post("/api/admin/deletedepartment", data);
+export const deleteBatch = (data) =>
+  API.post("/api/admin/deletebatch", data);
 
 export const getAdmin = (admin) => API.post("/api/admin/getadmin", admin);
 
 export const addDepartment = (department) =>
   API.post("/api/admin/adddepartment", department);
+
+
+export const addBatch = (batch) =>
+  API.post("/api/admin/addbatch", batch);
 
 export const addFaculty = (faculty) =>
   API.post("/api/admin/addfaculty", faculty);
@@ -57,8 +64,12 @@ export const getFaculty = (department) =>
 
 export const addSubject = (subject) =>
   API.post("/api/admin/addsubject", subject);
+
 export const getSubject = (subject) =>
   API.post("/api/admin/getsubject", subject);
+
+export const getSubjectByFaculty = (faculty) =>
+  API.post("/api/faculty/getsubject", faculty);
 
 export const addStudent = (student) =>
   API.post("/api/admin/addstudent", student);
@@ -66,6 +77,7 @@ export const addStudent = (student) =>
 export const getStudent = (student) =>
   API.post("/api/admin/getstudent", student);
 export const getNotice = (notice) => API.post("/api/admin/getnotice", notice);
+export const deleteNotice = (notice) => API.post("/api/admin/deletenotice", notice);
 
 // Faculty
 
@@ -82,12 +94,15 @@ export const createTest = (test) => API.post("/api/faculty/createtest", test);
 export const getTest = (test) => API.post("/api/faculty/gettest", test);
 export const getMarksStudent = (student) =>
   API.post("/api/faculty/getstudent", student);
+export const getStudentForAttendance = (student) => 
+  API.post("/api/faculty/getstudentforattendance", student);
 export const uploadMarks = (data) => API.post("/api/faculty/uploadmarks", data);
 export const markAttendance = (data) =>
   API.post("/api/faculty/markattendance", data);
+export const updateAttendance = (data) =>
+  API.post("/api/faculty/updateattendance", data);
 
 // Student
-
 export const studentSignIn = (formData) =>
   API.post("/api/student/login", formData);
 
@@ -100,3 +115,6 @@ export const getTestResult = (testResult) =>
   API.post("/api/student/testresult", testResult);
 export const getAttendance = (attendance) =>
   API.post("/api/student/attendance", attendance);
+  
+export const getTestMarks = (data) => 
+  API.post("/api/faculty/gettestmarks", data);

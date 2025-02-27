@@ -55,29 +55,19 @@ export const getSubject = (department, year) => async (dispatch) => {
 };
 
 export const getTestResult =
-  (department, year, section) => async (dispatch) => {
+  (studentId) => async (dispatch) => {
     try {
-      const formData = {
-        department,
-        year,
-        section,
-      };
-      const { data } = await api.getTestResult(formData);
-      dispatch({ type: TEST_RESULT, payload: data });
+      const { data } = await api.getTestResult(studentId);
+      dispatch({ type: TEST_RESULT, payload: data.answer });
     } catch (error) {
       dispatch({ type: SET_ERRORS, payload: error.response.data });
     }
   };
 
 export const getAttendance =
-  (department, year, section) => async (dispatch) => {
+  (studentId) => async (dispatch) => {
     try {
-      const formData = {
-        department,
-        year,
-        section,
-      };
-      const { data } = await api.getAttendance(formData);
+      const { data } = await api.getAttendance({studentId});
       dispatch({ type: ATTENDANCE, payload: data });
     } catch (error) {
       dispatch({ type: SET_ERRORS, payload: error.response.data });

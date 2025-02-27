@@ -5,7 +5,7 @@ import Header from "../Header";
 import Sidebar from "../Sidebar";
 import Body from "./Body";
 
-const GetFaculty = () => {
+const DeleteBatch = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getAllDepartment());
@@ -23,4 +23,4 @@ const GetFaculty = () => {
   );
 };
 
-export default GetFaculty;
+export default DeleteBatch;

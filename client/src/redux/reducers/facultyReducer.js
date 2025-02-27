@@ -2,11 +2,14 @@ import {
   ADD_TEST,
   ATTENDANCE_MARKED,
   FACULTY_LOGIN,
+  GET_SUBJECT,
   GET_TEST,
   LOGOUT,
   MARKS_UPLOADED,
+  UPDATE_ATTENDANCE,
   UPDATE_FACULTY,
   UPDATE_PASSWORD,
+  GET_STUDENT_FOR_ATTENDANCE
 } from "../actionTypes";
 
 const initialState = {
@@ -17,6 +20,9 @@ const initialState = {
   marksUploaded: false,
   attendanceUploaded: false,
   tests: [],
+  subjects: [],
+  attendance: [],
+  students : [],
 };
 
 const facultyReducer = (state = initialState, action) => {
@@ -37,11 +43,21 @@ const facultyReducer = (state = initialState, action) => {
         ...state,
         updatedFaculty: action.payload,
       };
+    case UPDATE_ATTENDANCE: 
+      return {
+        ...state, 
+        attendance: action.payload,
+      }
     case ADD_TEST:
       return {
         ...state,
         testAdded: action.payload,
       };
+    case GET_SUBJECT: 
+      return {
+        ...state,
+        subjects: action.payload,
+      }
     case GET_TEST:
       return {
         ...state,
@@ -56,6 +72,11 @@ const facultyReducer = (state = initialState, action) => {
       return {
         ...state,
         attendanceUploaded: action.payload,
+      };
+      case GET_STUDENT_FOR_ATTENDANCE:
+      return {
+        ...state,
+        students : action.payload,
       };
 
     default:

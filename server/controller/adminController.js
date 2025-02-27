@@ -6,6 +6,8 @@ import Subject from "../models/subject.js";
 import Notice from "../models/notice.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import Batch from "../models/batch.js";
+import faculty from "../models/faculty.js";
 
 export const adminLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -107,34 +109,41 @@ export const addAdmin = async (req, res) => {
   try {
     const { name, dob, department, contactNumber, avatar, email, joiningYear } =
       req.body;
+
     const errors = { emailError: String };
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
-    const admins = await Admin.find({ department });
 
-    let helper;
-    if (admins.length < 10) {
-      helper = "00" + admins.length.toString();
-    } else if (admins.length < 100 && admins.length > 9) {
-      helper = "0" + admins.length.toString();
-    } else {
-      helper = admins.length.toString();
-    }
-    var date = new Date();
-    var components = ["ADM", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-   
+    do {
+      const adminsCount = await Admin.countDocuments({ department });
+      let helper = (adminsCount + attempt).toString().padStart(3, "0");
+      let date = new Date();
+      let components = ["ADM", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Admin.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increment attempt if username already exists
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
-    const newAdmin = await new Admin({
+
+    const newAdmin = new Admin({
       name,
       email,
       password: hashedPassword,
@@ -146,18 +155,20 @@ export const addAdmin = async (req, res) => {
       dob,
       passwordUpdated,
     });
+
     await newAdmin.save();
+
     return res.status(200).json({
       success: true,
-      message: "Admin registerd successfully",
+      message: "Admin registered successfully",
       response: newAdmin,
     });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.log(error);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 export const addDummyAdmin = async () => {
   const email = "dummy@gmail.com";
   const password = "123";
@@ -213,11 +224,43 @@ export const createNotice = async (req, res) => {
   }
 };
 
+export const addBatch = async (req, res) => {
+  try {
+    const errors = { batchError: "" }; // Correctly initialize errors object
+    const { syear, eyear } = req.body;
+
+    // Find a batch with the exact match of both syear and eyear
+    const existingBatch = await Batch.findOne({ startYear: syear, endYear: eyear });
+    // console.log(existingBatch);    
+    if (existingBatch) { // If a batch already exists with the same syear and eyear
+      errors.batchError = "Batch already exists";
+      return res.status(400).json(errors);
+    }
+
+    // Create a new batch if no match is found
+    const newBatch = new Batch({
+      startYear: syear,
+      endYear: eyear,
+    });
+
+    await newBatch.save();
+    return res.status(200).json({
+      success: true,
+      message: "Batch added successfully",
+      response: newBatch,
+    });
+  } catch (error) {
+    const errors = { backendError: error.message }; // Include error message for clarity
+    return res.status(500).json(errors);
+  }
+};
+
+
 export const addDepartment = async (req, res) => {
   try {
     const errors = { departmentError: String };
     const { department } = req.body;
-    const existingDepartment = await Department.findOne({ department });
+    const existingDepartment = await Department.findOne({department: department.toUpperCase() });
     if (existingDepartment) {
       errors.departmentError = "Department already added";
       return res.status(400).json(errors);
@@ -232,7 +275,7 @@ export const addDepartment = async (req, res) => {
     }
 
     const newDepartment = await new Department({
-      department,
+      department : department.toUpperCase(),
       departmentCode,
     });
 
@@ -262,35 +305,41 @@ export const addFaculty = async (req, res) => {
       gender,
       designation,
     } = req.body;
+
     const errors = { emailError: String };
     const existingFaculty = await Faculty.findOne({ email });
     if (existingFaculty) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
 
-    const faculties = await Faculty.find({ department });
-    let helper;
-    if (faculties.length < 10) {
-      helper = "00" + faculties.length.toString();
-    } else if (faculties.length < 100 && faculties.length > 9) {
-      helper = "0" + faculties.length.toString();
-    } else {
-      helper = faculties.length.toString();
-    }
-    var date = new Date();
-    var components = ["FAC", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-    
+    do {
+      const facultiesCount = await Faculty.countDocuments(); // Count existing faculty members
+      let helper = (facultiesCount + attempt).toString().padStart(3, "0"); // Ensure 3-digit format
+      var date = new Date();
+      var components = ["FAC", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Faculty.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increase attempt to get a unique username
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
 
-    const newFaculty = await new Faculty({
+    const newFaculty = new Faculty({
       name,
       email,
       password: hashedPassword,
@@ -304,35 +353,42 @@ export const addFaculty = async (req, res) => {
       designation,
       passwordUpdated,
     });
+
     await newFaculty.save();
+
     return res.status(200).json({
       success: true,
-      message: "Faculty registerd successfully",
+      message: "Faculty registered successfully",
       response: newFaculty,
     });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.log(error);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 
 export const getFaculty = async (req, res) => {
   try {
     const { department } = req.body;
-    const errors = { noFacultyError: String };
-    const faculties = await Faculty.find({ department });
-    if (faculties.length === 0) {
-      errors.noFacultyError = "No Faculty Found";
-      return res.status(404).json(errors);
+    let faculties;
+
+    if (department) {
+      faculties = await Faculty.find({ department });
+    } else {
+      faculties = await Faculty.find(); // Fetch all faculties if no department is specified
     }
+
+    if (faculties.length === 0) {
+      return res.status(404).json({ noFacultyError: "No Faculty Found" });
+    }
+
     res.status(200).json({ result: faculties });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 export const getNotice = async (req, res) => {
   try {
     const errors = { noNoticeError: String };
@@ -349,12 +405,29 @@ export const getNotice = async (req, res) => {
   }
 };
 
+export const deleteNotice = async (req, res) => {
+  
+    const errors = { noNoticeError: String };
+    const {notice }= req.body; 
+    
+    try{
+      const res = await Notice.findByIdAndDelete(notice);
+      //console.log(res);
+      res.status(200).json({msg : "Notice deleted successfully"})
+    } catch(error){
+      const errors = { backendError: String };
+      errors.backendError = error;
+      res.status(500).json(errors);
+    }
+    
+};
+
 export const addSubject = async (req, res) => {
   try {
-    const { totalLectures, department, subjectCode, subjectName, year } =
+    const { totalLectures, department, subjectCode, subjectName, semester , batch , faculty} =
       req.body;
     const errors = { subjectError: String };
-    const subject = await Subject.findOne({ subjectCode });
+    const subject = await Subject.findOne({ subjectCode, department });
     if (subject) {
       errors.subjectError = "Given Subject is already added";
       return res.status(400).json(errors);
@@ -365,17 +438,13 @@ export const addSubject = async (req, res) => {
       department,
       subjectCode,
       subjectName,
-      year,
+      batch,
+      faculty,
+      semester,
     });
 
     await newSubject.save();
-    const students = await Student.find({ department, year });
-    if (students.length !== 0) {
-      for (var i = 0; i < students.length; i++) {
-        students[i].subjects.push(newSubject._id);
-        await students[i].save();
-      }
-    }
+    
     return res.status(200).json({
       success: true,
       message: "Subject added successfully",
@@ -387,31 +456,118 @@ export const addSubject = async (req, res) => {
     res.status(500).json(errors);
   }
 };
+// export const getAllSubject = async (req, res) => {
+//   try {
+//     const subjects = await Subject.find();
+//     res.status(200).json(subjects);
+//   } catch (error) {
+//     console.log("Backend Error", error);
+//   }
+// };
 
+// export const getSubject = async (req, res) => {
+//   try {
+//     const { department, semester, batch } = req.body;
+
+//     if (!req.userId) return res.json({ message: "Unauthenticated" });
+
+//     const errors = { noSubjectError: "" };
+
+//     // Fetch subjects based on the filters
+//     let subjects = await Subject.find({ department, semester, batch });
+//     if (subjects.length === 0) {
+//       errors.noSubjectError = "No Subject Found";
+//       return res.status(404).json(errors);
+//     }
+
+//     // Use Promise.all to wait for all faculty lookups
+//     const updatedSubjects = await Promise.all(
+//       subjects.map(async (subject) => {
+//         const faculty = await Faculty.findById(subject.faculty);
+//         return { ...subject.toObject(), faculty: faculty ? faculty.name : "Unknown" };
+//       })
+//     );
+
+//     // Send the updated subjects as the response
+//     res.status(200).json({ result: updatedSubjects });
+//   } catch (error) {
+//     const errors = { backendError: "" };
+//     errors.backendError = error.message || "An error occurred";
+//     res.status(500).json(errors);
+//   }
+// };
 export const getSubject = async (req, res) => {
   try {
-    const { department, year } = req.body;
+    const { department, semester, batch } = req.body;
 
     if (!req.userId) return res.json({ message: "Unauthenticated" });
-    const errors = { noSubjectError: String };
 
-    const subjects = await Subject.find({ department, year });
+    const errors = { noSubjectError: "" };
+
+    // Fetch subjects based on the filters
+    let subjects = await Subject.find({ department, semester, batch });
     if (subjects.length === 0) {
       errors.noSubjectError = "No Subject Found";
       return res.status(404).json(errors);
     }
-    res.status(200).json({ result: subjects });
+
+    // Use Promise.all to wait for all faculty and batch lookups
+    const updatedSubjects = await Promise.all(
+      subjects.map(async (subject) => {
+        const faculty = await Faculty.findById(subject.faculty);
+        const batchData = await Batch.findById(subject.batch);
+
+        return {
+          ...subject.toObject(),
+          faculty: faculty ? faculty.name : "Unknown",
+          batchId: batchData ? batchData._id : null,
+          batchName: batchData ? `${batchData.startYear} - ${batchData.endYear}` : "Unknown",
+        };
+      })
+    );
+
+    // Send the updated subjects as the response
+    res.status(200).json({ result: updatedSubjects });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
+    const errors = { backendError: "" };
+    errors.backendError = error.message || "An error occurred";
     res.status(500).json(errors);
   }
 };
 
+export const getAllSubject = async (req, res) => {
+  try {
+    const subjects = await Subject.find();
+
+    // Use Promise.all to populate batch details
+    const updatedSubjects = await Promise.all(
+      subjects.map(async (subject) => {
+        const batchData = await Batch.findById(subject.batch);
+
+        return {
+          ...subject.toObject(),
+          batchId: batchData ? batchData._id : null,
+          batchName: batchData ? `${batchData.startYear} - ${batchData.endYear}` : "Unknown",
+        };
+      })
+    );
+
+    res.status(200).json(updatedSubjects);
+  } catch (error) {
+    console.log("Backend Error", error);
+    res.status(500).json({ error: "An error occurred" });
+  }
+};
+
+
 export const getAdmin = async (req, res) => {
   try {
     const { department } = req.body;
-
+     if(!department){
+      const admins = await Admin.find({});
+      
+       return res.status(200).json({ result: admins });
+     }
     const errors = { noAdminError: String };
 
     const admins = await Admin.find({ department });
@@ -429,45 +585,47 @@ export const getAdmin = async (req, res) => {
 
 export const deleteAdmin = async (req, res) => {
   try {
-    const admins = req.body;
-    const errors = { noAdminError: String };
-    for (var i = 0; i < admins.length; i++) {
-      var admin = admins[i];
+    const {adminId} = req.body;
 
-      await Admin.findOneAndDelete({ _id: admin });
-    }
-    res.status(200).json({ message: "Admin Deleted" });
+
+      await Admin.findByIdAndDelete(adminId);
+     return res.status(200).json({ message: "Admin Deleted" });
+   
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
-    res.status(500).json(errors);
+    return res.status(500).json(errors);
   }
 };
+
+
 export const deleteFaculty = async (req, res) => {
   try {
-    const faculties = req.body;
-    const errors = { noFacultyError: String };
-    for (var i = 0; i < faculties.length; i++) {
-      var faculty = faculties[i];
+    const { facultyId } = req.body; // Expecting facultyId from URL params
 
-      await Faculty.findOneAndDelete({ _id: faculty });
+    if (!facultyId) {
+      return res.status(400).json({ error: "Faculty ID is required" });
     }
-    res.status(200).json({ message: "Faculty Deleted" });
+
+    const deletedFaculty = await Faculty.findByIdAndDelete(facultyId);
+
+    if (!deletedFaculty) {
+      return res.status(404).json({ error: "Faculty not found" });
+    }
+
+    res.status(200).json({ message: "Faculty deleted successfully" });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 export const deleteStudent = async (req, res) => {
   try {
-    const students = req.body;
-    const errors = { noStudentError: String };
-    for (var i = 0; i < students.length; i++) {
-      var student = students[i];
+    const {studentId} = req.body;
+  
 
-      await Student.findOneAndDelete({ _id: student });
-    }
+      await Student.findByIdAndDelete(studentId);
+    
     res.status(200).json({ message: "Student Deleted" });
   } catch (error) {
     const errors = { backendError: String };
@@ -477,13 +635,10 @@ export const deleteStudent = async (req, res) => {
 };
 export const deleteSubject = async (req, res) => {
   try {
-    const subjects = req.body;
-    const errors = { noSubjectError: String };
-    for (var i = 0; i < subjects.length; i++) {
-      var subject = subjects[i];
+    const {subjectId} = req.body;
 
-      await Subject.findOneAndDelete({ _id: subject });
-    }
+      await Subject.findByIdAndDelete(subjectId);
+    
     res.status(200).json({ message: "Subject Deleted" });
   } catch (error) {
     const errors = { backendError: String };
@@ -506,6 +661,21 @@ export const deleteDepartment = async (req, res) => {
   }
 };
 
+// delete batch
+
+export const deleteBatch = async (req, res) => {
+  try {
+    const { startYear , endYear } = req.body;
+
+    await Batch.findOneAndDelete({ startYear , endYear });
+
+    res.status(200).json({ message: "Batch Deleted" });
+  } catch (error) {
+    const errors = { backendError: String };
+    errors.backendError = error;
+    res.status(500).json(errors);
+  }
+};
 export const addStudent = async (req, res) => {
   try {
     const {
@@ -515,44 +685,52 @@ export const addStudent = async (req, res) => {
       contactNumber,
       avatar,
       email,
-      section,
+      semester,
       gender,
       batch,
       fatherName,
-      motherName,
-      fatherContactNumber,
-      motherContactNumber,
-      year,
     } = req.body;
+
     const errors = { emailError: String };
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
 
-    const students = await Student.find({ department });
-    let helper;
-    if (students.length < 10) {
-      helper = "00" + students.length.toString();
-    } else if (students.length < 100 && students.length > 9) {
-      helper = "0" + students.length.toString();
-    } else {
-      helper = students.length.toString();
-    }
-    var date = new Date();
-    var components = ["STU", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-    
+    do {
+      const studentsCount = await Student.countDocuments({ department });
+      let helper = (studentsCount + attempt).toString().padStart(3, "0");
+      let date = new Date();
+      let components = ["STU", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Student.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increment attempt if username already exists
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
 
-    const newStudent = await new Student({
+    // Finding batch ID
+    var batchId = await Batch.findOne({
+      startYear: batch.split("-")[0],
+      endYear: batch.split("-")[1],
+    });
+
+    const newStudent = new Student({
       name,
       dob,
       password: hashedPassword,
@@ -561,62 +739,85 @@ export const addStudent = async (req, res) => {
       contactNumber,
       avatar,
       email,
-      section,
+      semester,
       gender,
-      batch,
+      batch: batchId._id,
       fatherName,
-      motherName,
-      fatherContactNumber,
-      motherContactNumber,
-      year,
       passwordUpdated,
     });
+
     await newStudent.save();
-    const subjects = await Subject.find({ department, year });
-    if (subjects.length !== 0) {
-      for (var i = 0; i < subjects.length; i++) {
-        newStudent.subjects.push(subjects[i]._id);
-      }
-    }
-    await newStudent.save();
+
     return res.status(200).json({
       success: true,
-      message: "Student registerd successfully",
+      message: "Student registered successfully",
       response: newStudent,
     });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.log(error);
+    res.status(500).json({ backendError: error.message });
   }
 };
 
 export const getStudent = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
-    const errors = { noStudentError: String };
-    const students = await Student.find({ department, year });
+    const { department, batch, semester } = req.body;
+    const errors = { noStudentError: "" };
 
-    if (students.length === 0) {
+    // Build the query dynamically to include only provided filters
+    const query = {};
+    if (department) query.department = department;
+    if (batch) query.batch = batch;
+    if (semester) query.semester = semester;
+
+    // Populate the batch field to return batch name and ID
+    const students = await Student.find(query).populate({
+      path: "batch",
+      select: "startYear endYear", // Fetch only necessary fields
+    });
+
+    // Transform the batch field to include batchId and formatted batch name
+    const formattedStudents = students.map((stu) => ({
+      ...stu._doc,
+      batchId: stu.batch._id, // Send batchId
+      batchName: `${stu.batch.startYear} - ${stu.batch.endYear}`, // Send batch name
+    }));
+
+    if (formattedStudents.length === 0) {
       errors.noStudentError = "No Student Found";
       return res.status(404).json(errors);
     }
 
-    res.status(200).json({ result: students });
+    res.status(200).json({ result: formattedStudents });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
+
 export const getAllStudent = async (req, res) => {
   try {
-    const students = await Student.find();
-    res.status(200).json(students);
+    // Fetch all students with populated batch details
+    const students = await Student.find().populate({
+      path: "batch",
+      select: "startYear endYear", // Fetch only necessary fields
+    });
+
+    // Modify response to include batchId and batchName
+    const formattedStudents = students.map((stu) => ({
+      ...stu.toObject(),
+      batchId: stu.batch._id, // Send batchId
+      batchName: `${stu.batch.startYear} - ${stu.batch.endYear}`, // Send batch name
+    }));
+
+    res.status(200).json(formattedStudents);
   } catch (error) {
     console.log("Backend Error", error);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
+
 
 export const getAllFaculty = async (req, res) => {
   try {
@@ -635,6 +836,7 @@ export const getAllAdmin = async (req, res) => {
     console.log("Backend Error", error);
   }
 };
+
 export const getAllDepartment = async (req, res) => {
   try {
     const departments = await Department.find();
@@ -643,11 +845,14 @@ export const getAllDepartment = async (req, res) => {
     console.log("Backend Error", error);
   }
 };
-export const getAllSubject = async (req, res) => {
+
+
+export const getAllBatch = async (req, res) => {
   try {
-    const subjects = await Subject.find();
-    res.status(200).json(subjects);
+    const batches = await Batch.find();
+    res.status(200).json(batches);
   } catch (error) {
     console.log("Backend Error", error);
   }
 };
+

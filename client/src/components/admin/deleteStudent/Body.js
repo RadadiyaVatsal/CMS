@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useDispatch, useSelector } from "react-redux";
-import { getStudent, deleteStudent } from "../../../redux/actions/adminActions";
+import { getStudent, deleteStudent,getAllBatch } from "../../../redux/actions/adminActions";
 import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { DELETE_STUDENT, SET_ERRORS } from "../../../redux/actionTypes";
 
+
 const Body = () => {
   const dispatch = useDispatch();
   const departments = useSelector((state) => state.admin.allDepartment);
+  const batches = useSelector((state) => state.admin.allBatch);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
@@ -17,7 +19,8 @@ const Body = () => {
 
   const [value, setValue] = useState({
     department: "",
-    year: "",
+    semester: "",
+    batch : ""
   });
   const [search, setSearch] = useState(false);
 
@@ -71,13 +74,17 @@ const Body = () => {
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
   }, []);
+  
+  useEffect(() => {
+    dispatch(getAllBatch());
+  }, []);
 
   return (
     <div className="flex-[0.8] mt-3">
       <div className="space-y-5">
         <div className="flex text-gray-400 items-center space-x-2">
           <DeleteIcon />
-          <h1>Delete Faculty</h1>
+          <h1>Delete Student</h1>
         </div>
         <div className=" mr-10 bg-white grid grid-cols-4 rounded-xl pt-6 pl-6 h-[29.5rem]">
           <form
@@ -100,19 +107,40 @@ const Body = () => {
                 </MenuItem>
               ))}
             </Select>
-            <label htmlFor="year">Year</label>
+            <label htmlFor="Batch">Batch</label>
             <Select
               required
               displayEmpty
               sx={{ height: 36, width: 224 }}
               inputProps={{ "aria-label": "Without label" }}
-              value={value.year}
-              onChange={(e) => setValue({ ...value, year: e.target.value })}>
+              value={value.batch}
+              onChange={(e) =>
+                setValue({ ...value, batch: e.target.value })
+              }>
+              <MenuItem value="">None</MenuItem>
+              {batches?.map((dp, idx) => (
+                <MenuItem key={idx} value={dp._id}>
+                  {dp.startYear}-{dp.endYear}
+                </MenuItem>
+              ))}
+            </Select>
+            <label htmlFor="Semester">Semester</label>
+            <Select
+              required
+              displayEmpty
+              sx={{ height: 36, width: 224 }}
+              inputProps={{ "aria-label": "Without label" }}
+              value={value.semester}
+              onChange={(e) => setValue({ ...value, semester: e.target.value })}>
               <MenuItem value="">None</MenuItem>
               <MenuItem value="1">1</MenuItem>
               <MenuItem value="2">2</MenuItem>
               <MenuItem value="3">3</MenuItem>
               <MenuItem value="4">4</MenuItem>
+              <MenuItem value="5">5</MenuItem>
+              <MenuItem value="6">6</MenuItem>
+              <MenuItem value="7">7</MenuItem>
+              <MenuItem value="8">8</MenuItem>
             </Select>
 
             <button

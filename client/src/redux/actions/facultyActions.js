@@ -8,12 +8,17 @@ import {
   GET_STUDENT,
   MARKS_UPLOADED,
   ATTENDANCE_MARKED,
+  GET_SUBJECT,
+  ATTENDANCE_DELETED,
+  UPDATE_ATTENDANCE,
+  GET_STUDENT_FOR_ATTENDANCE
 } from "../actionTypes";
 import * as api from "../api";
 
 export const facultySignIn = (formData, navigate) => async (dispatch) => {
   try {
     const { data } = await api.facultySignIn(formData);
+    console.log(data);
     dispatch({ type: FACULTY_LOGIN, data });
     if (data.result.passwordUpdated) navigate("/faculty/home");
     else navigate("/faculty/password");
@@ -21,6 +26,7 @@ export const facultySignIn = (formData, navigate) => async (dispatch) => {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
 
 export const facultyUpdatePassword =
   (formData, navigate) => async (dispatch) => {
@@ -50,18 +56,40 @@ export const createTest = (formData) => async (dispatch) => {
 
     dispatch({ type: ADD_TEST, payload: true });
   } catch (error) {
+    console.log(error);
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
 
+export const getTestMarks = async (formData) => {
+  try {
+    const { data } = await api.getTestMarks(formData);
+    return data;
+  } catch (error) {
+    console.log("error in getTestMakrs: ", error);
+    return error;
+  }
+}
+
 export const getTest = (formData) => async (dispatch) => {
   try {
+   
     const { data } = await api.getTest(formData);
-    dispatch({ type: GET_TEST, payload: data });
+    dispatch({ type: GET_TEST, payload: data.result });
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 };
+
+export const getSubject = (formData) => async (dispatch) =>{
+  try{
+    const { data} = await api.getSubjectByFaculty(formData);
+    dispatch({type : GET_SUBJECT , payload : data})
+  }catch (error){
+    console.log(error);
+    dispatch({ type: SET_ERRORS, payload: error.response });
+  }
+}
 
 export const getStudent = (formData) => async (dispatch) => {
   try {
@@ -72,34 +100,41 @@ export const getStudent = (formData) => async (dispatch) => {
   }
 };
 
+export const getStudentForAttendance = (subject) => async (dispatch) => {
+  try {
+    const { data } = await api.getStudentForAttendance({subject});
+    console.log("Here in actions" , data);
+    dispatch({ type: GET_STUDENT_FOR_ATTENDANCE, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+};
+
 export const uploadMark =
-  (marks, department, section, year, test) => async (dispatch) => {
+  (marks, department, test) => async (dispatch) => {
     try {
       const formData = {
         marks,
         department,
-        section,
-        year,
         test,
       };
+
       const { data } = await api.uploadMarks(formData);
       alert("Marks Uploaded Successfully");
       dispatch({ type: MARKS_UPLOADED, payload: true });
     } catch (error) {
-      dispatch({ type: SET_ERRORS, payload: error.response.data });
+      dispatch({ type: SET_ERRORS, payload: error.message });
     }
   };
 
 export const markAttendance =
-  (checkedValue, subjectName, department, year, section) =>
+  (checkedValue, subject, totalStudents) =>
   async (dispatch) => {
     try {
       const formData = {
         selectedStudents: checkedValue,
-        subjectName,
-        department,
-        year,
-        section,
+        subject,
+        totalStudents,
       };
       const { data } = await api.markAttendance(formData);
       alert("Attendance Marked Successfully");
@@ -108,3 +143,12 @@ export const markAttendance =
       dispatch({ type: SET_ERRORS, payload: error.response.data });
     }
   };
+
+export const updateAttendance = (subject) => async (dispatch) => {
+  try {
+    const { data } = await api.updateAttendance({subject});
+    dispatch({ type: UPDATE_ATTENDANCE, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response.data });
+  }
+}

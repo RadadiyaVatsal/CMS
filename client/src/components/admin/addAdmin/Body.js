@@ -8,9 +8,11 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { ADD_ADMIN, SET_ERRORS } from "../../../redux/actionTypes";
+import { useNavigate } from "react-router-dom";
 
 const Body = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const store = useSelector((state) => state);
   const departments = useSelector((state) => state.admin.allDepartment);
   const [loading, setLoading] = useState(false);
@@ -24,10 +26,18 @@ const Body = () => {
     avatar: "",
     joiningYear: Date().split(" ")[3],
   });
+
   useEffect(() => {
-    if (Object.keys(store.errors).length !== 0) {
+    if (store.admin.adminAdded) {
+      navigate("/admin/manageadmin");
+    }
+  }, [store.admin.adminAdded, navigate]);
+
+  useEffect(() => {
+    if (store.errors && Object.keys(store.errors).length > 0) {
+      console.log("Redux Store Errors:", store.errors);
       setError(store.errors);
-      setValue({ ...value, email: "" });
+      setLoading(false);
     }
   }, [store.errors]);
 
@@ -39,31 +49,26 @@ const Body = () => {
   };
 
   useEffect(() => {
-    if (store.errors || store.admin.adminAdded) {
-      setLoading(false);
-      if (store.admin.adminAdded) {
-        setValue({
-          name: "",
-          dob: "",
-          email: "",
-          department: "",
-          contactNumber: "",
-          avatar: "",
-          joiningYear: Date().split(" ")[3],
-          password: "",
-          username: "",
-        });
-        dispatch({ type: SET_ERRORS, payload: {} });
-        dispatch({ type: ADD_ADMIN, payload: false });
-      }
-    } else {
-      setLoading(true);
+    if (store.admin.adminAdded) {
+      setValue({
+        name: "",
+        dob: "",
+        email: "",
+        department: "",
+        contactNumber: "",
+        avatar: "",
+        joiningYear: Date().split(" ")[3],
+        password: "",
+        username: "",
+      });
+      dispatch({ type: SET_ERRORS, payload: {} });
+      dispatch({ type: ADD_ADMIN, payload: false });
     }
-  }, [store.errors, store.admin.adminAdded]);
+  }, [store.admin.adminAdded, dispatch]);
 
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className="flex-[0.8] mt-3">
@@ -72,13 +77,12 @@ const Body = () => {
           <EngineeringIcon />
           <h1>Add Admin</h1>
         </div>
-        <div className=" mr-10 bg-white flex flex-col rounded-xl ">
+        <div className="mr-10 bg-white flex flex-col rounded-xl">
           <form className={classes.adminForm0} onSubmit={handleSubmit}>
             <div className={classes.adminForm1}>
               <div className={classes.adminForm2l}>
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Name :</h1>
-
                   <input
                     placeholder="Full Name"
                     required
@@ -90,10 +94,8 @@ const Body = () => {
                     }
                   />
                 </div>
-
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>DOB :</h1>
-
                   <input
                     placeholder="DD/MM/YYYY"
                     className={classes.adminInput}
@@ -107,7 +109,6 @@ const Body = () => {
                 </div>
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Email :</h1>
-
                   <input
                     placeholder="Email"
                     required
@@ -131,7 +132,8 @@ const Body = () => {
                     value={value.department}
                     onChange={(e) =>
                       setValue({ ...value, department: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     {departments?.map((dp, idx) => (
                       <MenuItem key={idx} value={dp.department}>
@@ -142,7 +144,6 @@ const Body = () => {
                 </div>
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Contact Number :</h1>
-
                   <input
                     required
                     placeholder="Contact Number"
@@ -156,7 +157,6 @@ const Body = () => {
                 </div>
                 <div className={classes.adminForm3}>
                   <h1 className={classes.adminLabel}>Avatar :</h1>
-
                   <FileBase
                     type="file"
                     multiple={false}
@@ -187,8 +187,16 @@ const Body = () => {
                   setError({});
                 }}
                 className={classes.adminFormClearButton}
-                type="button">
+                type="button"
+              >
                 Clear
+              </button>
+              <button
+                onClick={() => navigate("/admin/manageadmin")}
+                className={classes.adminFormBackButton}
+                type="button"
+              >
+                Back
               </button>
             </div>
             <div className={classes.loadingAndError}>
@@ -201,9 +209,9 @@ const Body = () => {
                   messageColor="blue"
                 />
               )}
-              {(error.emailError || error.backendError) && (
+              {error && Object.keys(error).length > 0 && (
                 <p className="text-red-500">
-                  {error.emailError || error.backendError}
+                  {error.emailError || error.backendError || "Failed to add admin"}
                 </p>
               )}
             </div>

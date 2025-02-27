@@ -73,15 +73,17 @@ const Body = () => {
                   <h1 className={classes.adminLabel}>Date :</h1>
 
                   <input
-                    placeholder="Date"
-                    required
-                    className={classes.adminInput}
-                    type="date"
-                    value={value.date}
-                    onChange={(e) =>
-                      setValue({ ...value, date: e.target.value })
-                    }
-                  />
+                      placeholder="Date"
+                      required
+                      className={classes.adminInput}
+                      type="date"
+                      value={value.date}
+                      min={new Date().toISOString().split("T")[0]} // Disable past dates
+                      onChange={(e) =>
+                        setValue({ ...value, date: e.target.value })
+                      }
+                    />
+
                 </div>
 
                 <div className={classes.adminForm3}>

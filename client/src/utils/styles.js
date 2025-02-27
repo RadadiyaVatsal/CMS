@@ -21,6 +21,8 @@ export const adminForm3 = "grid grid-cols-2  gap-10";
 
 export const adminLabel =
   "font-bold text-lg bg-gray-700 shadow-xl text-white px-2 py-1 rounded-lg";
-export const adminInput = "border-2 px-2 py-1 text-sm";
+export const adminInput = "border-2 px-2 py-1 text-sm rounded-md";
 
 export const loadingAndError = "flex justify-center mt-6";
+export const adminFormDeleteButton = "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600";
+export const adminFormBackButton = "bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700";

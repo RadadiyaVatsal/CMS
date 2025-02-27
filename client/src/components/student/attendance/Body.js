@@ -10,12 +10,16 @@ import * as classes from "../../../utils/styles";
 const Body = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState({});
-  const attendance = useSelector((state) => state.student.attendance.result);
+  const attendance = useSelector((state) => state.student.attendance);
 
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
 
   const [search, setSearch] = useState(false);
+
+  useEffect(() => {    
+    console.log(attendance.result)
+  }, [attendance])
 
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
@@ -83,7 +87,7 @@ const Body = () => {
                       Percentage
                     </h1>
                   </div>
-                  {attendance?.map((res, idx) => (
+                  {attendance.result?.map((res, idx) => (
                     <div
                       key={idx}
                       className={`${classes.adminDataBody} grid-cols-8`}>
@@ -101,15 +105,15 @@ const Body = () => {
                       </h1>
                       <h1
                         className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {res.attended}
+                        {attendance.attendedLec[res.subjectCode][0]}
                       </h1>
                       <h1
                         className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {res.total}
+                        {attendance.attendedLec[res.subjectCode][1]}
                       </h1>
                       <h1
                         className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {res.percentage}
+                        {res.percentage ? res.percentage : 0}%
                       </h1>
                     </div>
                   ))}

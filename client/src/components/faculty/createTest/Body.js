@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { useDispatch, useSelector } from "react-redux";
-import { createTest } from "../../../redux/actions/facultyActions";
+import { createTest, getSubject } from "../../../redux/actions/facultyActions";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_TEST, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+// import faculty from "../../../../../server/models/faculty";
+
 const Body = () => {
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
@@ -14,49 +16,65 @@ const Body = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [value, setValue] = useState({
-    subjectCode: "",
-    section: "",
-    year: "",
     test: "",
     totalMarks: "",
     date: "",
-    department: user.result.department,
+    subject :"",
+    faculty: "",
   });
+  const subjects = useSelector((state) => state.faculty.subjects.result);
+
+  useEffect(() => {
+    dispatch(getSubject({faculty: user.result._id}))
+  }, [])
 
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
       setError(store.errors);
       setValue({
-        subjectCode: "",
-        section: "",
-        year: "",
-        test: "",
+          test: "",
         totalMarks: "",
         date: "",
-        department: user.result.department,
+       subject : "",
+       faculty: "",
       });
     }
   }, [store.errors]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setError({});
     setLoading(true);
-    dispatch(createTest(value));
+  
+    // Ensure faculty ID is properly set before dispatching
+    const updatedValue = {
+      ...value,
+      faculty: user.result._id,
+    };
+  
+    // console.log(updatedValue); // This should now include the faculty value
+  
+    dispatch(createTest(updatedValue));
+    setLoading(false);
+  
+    // Reset form values after submission
+    setValue({
+      test: "",
+      totalMarks: "",
+      date: "",
+      subject: "",
+      faculty: "", // Optional, since it's handled by the user object
+    });
   };
-
+  
   useEffect(() => {
     if (store.errors || store.faculty.testAdded) {
       setLoading(false);
       if (store.faculty.testAdded) {
         setValue({
-          subjectCode: "",
-          section: "",
-          year: "",
           test: "",
           totalMarks: "",
           date: "",
-          department: user.result.department,
+          subject : "",
         });
 
         dispatch({ type: SET_ERRORS, payload: {} });
@@ -98,50 +116,27 @@ const Body = () => {
                 </div>
 
                 <div className={classes.adminForm3}>
-                  <h1 className={classes.adminLabel}>Subject Code :</h1>
-
-                  <input
-                    required
-                    placeholder="Subject Code"
-                    className={classes.adminInput}
-                    type="text"
-                    value={value.subjectCode}
-                    onChange={(e) =>
-                      setValue({ ...value, subjectCode: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className={classes.adminForm3}>
-                  <h1 className={classes.adminLabel}>Department :</h1>
-
-                  <input
-                    required
-                    placeholder={user.result.department}
-                    disabled
-                    className={classes.adminInput}
-                    type="text"
-                    value={user.result.department}
-                  />
-                </div>
-                <div className={classes.adminForm3}>
-                  <h1 className={classes.adminLabel}>Year :</h1>
+                  <h1 className={classes.adminLabel}>Subject :</h1>
                   <Select
                     required
                     displayEmpty
                     sx={{ height: 36 }}
                     inputProps={{ "aria-label": "Without label" }}
-                    value={value.year}
+                    value={value.subject}
                     onChange={(e) =>
-                      setValue({ ...value, year: e.target.value })
-                    }>
+                      setValue({ ...value, subject: e.target.value })
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
-                    <MenuItem value="1">1</MenuItem>
-                    <MenuItem value="2">2</MenuItem>
-                    <MenuItem value="3">3</MenuItem>
-                    <MenuItem value="4">4</MenuItem>
+                    {subjects?.map((dp, idx) => (
+                      <MenuItem key={idx} value={dp.subjectCode}>
+                        {dp.subjectName}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </div>
+
+            
               </div>
               <div className={classes.adminForm2r}>
                 <div className={classes.adminForm3}>
@@ -171,28 +166,6 @@ const Body = () => {
                     }
                   />
                 </div>
-                <div className={classes.adminForm3}>
-                  <h1 className={classes.adminLabel}>Section :</h1>
-                  <Select
-                    required
-                    displayEmpty
-                    sx={{ height: 36 }}
-                    inputProps={{ "aria-label": "Without label" }}
-                    value={value.section}
-                    onChange={(e) =>
-                      setValue({ ...value, section: e.target.value })
-                    }>
-                    <MenuItem value="">None</MenuItem>
-                    <MenuItem value="1">1</MenuItem>
-                    <MenuItem value="2">2</MenuItem>
-                    <MenuItem value="3">3</MenuItem>
-                    <MenuItem value="4">4</MenuItem>
-                    <MenuItem value="5">5</MenuItem>
-                    <MenuItem value="6">6</MenuItem>
-                    <MenuItem value="7">7</MenuItem>
-                    <MenuItem value="8">8</MenuItem>
-                  </Select>
-                </div>
               </div>
             </div>
             <div className={classes.adminFormButton}>
@@ -202,13 +175,10 @@ const Body = () => {
               <button
                 onClick={() => {
                   setValue({
-                    subjectCode: "",
-                    section: "",
-                    year: "",
                     test: "",
                     totalMarks: "",
                     date: "",
-                    department: "",
+                    subject: "",
                   });
                   setError({});
                 }}

@@ -6,6 +6,8 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+import student from "../models/student.js";
 
 export const facultyLogin = async (req, res) => {
   const { username, password } = req.body;
@@ -111,15 +113,12 @@ export const updateFaculty = async (req, res) => {
 
 export const createTest = async (req, res) => {
   try {
-    const { subjectCode, department, year, section, date, test, totalMarks } =
-      req.body;
+    const { subject, date, test, totalMarks, faculty } = req.body;
+    // console.log(req.body);
     const errors = { testError: String };
     const existingTest = await Test.findOne({
-      subjectCode,
-      department,
-      year,
-      section,
       test,
+      faculty
     });
     if (existingTest) {
       errors.testError = "Given Test is already created";
@@ -128,21 +127,14 @@ export const createTest = async (req, res) => {
 
     const newTest = await new Test({
       totalMarks,
-      section,
+      subjectCode: subject,
       test,
       date,
-      department,
-      subjectCode,
-      year,
+      faculty,
     });
 
     await newTest.save();
-    const students = await Student.find({ department, year, section });
-    return res.status(200).json({
-      success: true,
-      message: "Test added successfully",
-      response: newTest,
-    });
+    return res.status(200).json({ message: "Test created successfully" });
   } catch (error) {
     const errors = { backendError: String };
     errors.backendError = error;
@@ -152,9 +144,9 @@ export const createTest = async (req, res) => {
 
 export const getTest = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { faculty } = req.body;
 
-    const tests = await Test.find({ department, year, section });
+    const tests = await Test.find({ faculty });
 
     res.status(200).json({ result: tests });
   } catch (error) {
@@ -164,11 +156,59 @@ export const getTest = async (req, res) => {
   }
 };
 
+export const getSubject = async (req, res) => {
+  try {
+    const { faculty } = req.body;
+
+    if (!req.userId) return res.json({ message: "Unauthenticated" });
+
+    // Fetch subjects based on the filters
+    let subjects = await Subject.find({ faculty: mongoose.Types.ObjectId(faculty)});
+    // console.log(subjects);
+    const errors = { noSubjectError: "" };
+    if (subjects.length === 0) {
+      errors.noSubjectError = "No Subject Found";
+      return res.status(404).json(errors);
+    }
+
+    return res.status(200).json({ result: subjects });
+  } catch (error) {
+    const errors = { backendError: "" };
+    errors.backendError = error.message || "An error occurred";
+    res.status(500).json(errors);
+  }
+};
+
+export const getStudentForAttendence = async (req, res) => {
+  try {
+    const { subject } = req.body;
+    const errors = { noSubject: String, noStudent: String };
+    if (!subject) {
+      errors.noSubject = "No subject found";
+      return res.status(404).json(errors);
+    }
+
+    const { batch, semester, department } = await Subject.findById(subject);
+    const students = await Student.find({ batch, semester, department });
+
+    if (!students || students.length == 0) {
+      errors.noStudent = "No students found";
+      return res.status(500).json(errors);
+    }
+    return res.status(200).json(students);
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 export const getStudent = async (req, res) => {
   try {
-    const { department, year, section } = req.body;
+    const { department, test, faculty } = req.body;
+    const testdata = await Test.findById(test);
+    const { batch, semester } = await Subject.findOne({subjectCode: testdata.subjectCode, faculty});
     const errors = { noStudentError: String };
-    const students = await Student.find({ department, year, section });
+    const students = await Student.find({ department, batch, semester });
+
     if (students.length === 0) {
       errors.noStudentError = "No Student Found";
       return res.status(404).json(errors);
@@ -182,91 +222,153 @@ export const getStudent = async (req, res) => {
   }
 };
 
+export const getTestMarks = async (req, res) => {
+  try {
+    const { test } = req.body;
+    const studentMarks = await Marks.find({exam : test});
+    res.status(200).json(studentMarks);
+  } catch (error) {
+    console.log("Error occured while fetching test marks of student");
+    res.status(500).json(error);
+  }
+}
 export const uploadMarks = async (req, res) => {
   try {
-    const { department, year, section, test, marks } = req.body;
+    const { test, marks } = req.body; // `test` is the test ID, and `marks` is the array of marks
+    const existingMarks = await Marks.find({ exam: test }); // Fetch existing marks for this test
 
-    const errors = { examError: String };
-    const existingTest = await Test.findOne({
-      department,
-      year,
-      section,
-      test,
-    });
-    const isAlready = await Marks.find({
-      exam: existingTest._id,
-    });
-
-    if (isAlready.length !== 0) {
-      errors.examError = "You have already uploaded marks of given exam";
-      return res.status(400).json(errors);
+    if (existingMarks.length !== 0) {
+      // Update marks for the existing test
+      for (let i = 0; i < marks.length; i++) {
+        await Marks.findOneAndUpdate(
+          { student: marks[i]._id, exam: test }, // Match the student and test
+          { marks: marks[i].value }, // Update marks
+          { upsert: true, new: true } // Create the document if it doesn't exist
+        );
+      }
+      return res.status(200).json({ message: "Marks updated successfully" });
+    } else {
+      // Create new marks for the test
+      for (let i = 0; i < marks.length; i++) {
+        const newMark = new Marks({
+          student: marks[i]._id,
+          exam: test,
+          marks: marks[i].value,
+        });
+        await newMark.save();
+      }
+      return res.status(200).json({ message: "Marks uploaded successfully" });
     }
-
-    for (var i = 0; i < marks.length; i++) {
-      const newMarks = await new Marks({
-        student: marks[i]._id,
-        exam: existingTest._id,
-        marks: marks[i].value,
-      });
-      await newMarks.save();
-    }
-    res.status(200).json({ message: "Marks uploaded successfully" });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.error("Error uploading marks:", error);
+    return res.status(500).json({ backendError: error.message });
   }
 };
 
+export const updateAttendance = async (req, res) => {
+  try {
+    const { subject } = req.body;
+    // Get the current date's start and end (to filter records by date only)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to start of the day (00:00:00)
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to end of the day (23:59:59)
+
+    const alreadyAdded = await Attendence.find({
+      subject,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    });
+
+    if (!alreadyAdded) {
+      return res.status(400).json({  });
+    }
+
+    return res.status(200).json({alreadyAdded});
+
+  } catch (error) {
+    return res.status(404).json({error});
+  }
+}
+
+
+export const getAttendanceByDate = async (req, res) => {
+  try {
+    const { facultyId, subjectId, date } = req.query;
+
+    if (!facultyId || !subjectId || !date) {
+      return res.status(400).json({ message: "Faculty ID, Subject ID, and Date are required." });
+    }
+
+    // Convert date to match database format
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Fetch attendance records for the subject on the given date
+    const attendanceRecords = await Attendance.find({
+      subject: subjectId,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    }).populate("student", "name username semester");
+
+    if (attendanceRecords.length > 0) {
+      return res.status(200).json({ attendanceRecords });
+    } else {
+      return res.status(200).json({ message: "No attendance marked yet." });
+    }
+  } catch (error) {
+    console.error("Error fetching attendance by date:", error);
+    return res.status(500).json({ message: "Server error, please try again later." });
+  }
+};
+
+
+
 export const markAttendance = async (req, res) => {
   try {
-    const { selectedStudents, subjectName, department, year, section } =
-      req.body;
+    const { subject, selectedStudents, totalStudents } = req.body;
 
-    const sub = await Subject.findOne({ subjectName });
+    // Get the current date's start and end (to filter records by date only)
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Set time to start of the day (00:00:00)
+    
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // Set time to end of the day (23:59:59)
 
-    const allStudents = await Student.find({ department, year, section });
+    // Check if attendance is already marked for this subject today
+    const alreadyAdded = await Attendence.findOne({
+      subject,
+      createdAt: { $gte: startOfDay, $lte: endOfDay }
+    });
 
-    for (let i = 0; i < allStudents.length; i++) {
-      const pre = await Attendence.findOne({
-        student: allStudents[i]._id,
-        subject: sub._id,
-      });
-      if (!pre) {
-        const attendence = new Attendence({
-          student: allStudents[i]._id,
-          subject: sub._id,
-        });
-        attendence.totalLecturesByFaculty += 1;
-        await attendence.save();
-      } else {
-        pre.totalLecturesByFaculty += 1;
-        await pre.save();
+    console.log(selectedStudents);
+
+    if (alreadyAdded) {
+      for (const student of totalStudents) {
+        const val = selectedStudents.includes(student._id);
+        
+        const res = await Attendence.updateOne(
+          { student: student._id, subject: subject }, // Filter criteria
+          { $set: { attended: val } }, // Update operation
+          { new: true, runValidators: true }
+        );
       }
+      return res.status(200).json({ message: "Attendance updated." });
     }
 
-    for (var a = 0; a < selectedStudents.length; a++) {
-      const pre = await Attendence.findOne({
-        student: selectedStudents[a],
-        subject: sub._id,
+    // Mark attendance for each student
+    for (const student of totalStudents) {
+      const attended = selectedStudents.includes(student._id);
+      await Attendence.create({
+        student: student._id,
+        subject: subject,
+        attended: attended
       });
-      if (!pre) {
-        const attendence = new Attendence({
-          student: selectedStudents[a],
-          subject: sub._id,
-        });
-
-        attendence.lectureAttended += 1;
-        await attendence.save();
-      } else {
-        pre.lectureAttended += 1;
-        await pre.save();
-      }
     }
-    res.status(200).json({ message: "Attendance Marked successfully" });
+
+    res.status(200).json({ message: "Attendance marked successfully." });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };

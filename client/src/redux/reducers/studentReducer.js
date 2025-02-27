@@ -14,7 +14,7 @@ const initialState = {
   testAdded: false,
   marksUploaded: false,
   attendanceUploaded: false,
-  testResult: [],
+  testResult: ["something something bolo"],
   tests: [],
   attendance: [],
 };

@@ -8,6 +8,9 @@ import MenuItem from "@mui/material/MenuItem";
 import Spinner from "../../../utils/Spinner";
 import { ADD_FACULTY, SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const Body = () => {
   const dispatch = useDispatch();
   const store = useSelector((state) => state);
@@ -33,12 +36,18 @@ const Body = () => {
     }
   }, [store.errors]);
 
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
     setError({});
     setLoading(true);
     dispatch(addFaculty(value));
   };
+  useEffect(() => {
+    if (store.admin.facultyAdded) {
+      navigate("/admin/managefaculty");
+    }
+  }, [store.admin.facultyAdded, navigate]);
 
   useEffect(() => {
     if (store.errors || store.admin.facultyAdded) {
@@ -146,7 +155,8 @@ const Body = () => {
                     value={value.department}
                     onChange={(e) =>
                       setValue({ ...value, department: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     {departments?.map((dp, idx) => (
                       <MenuItem key={idx} value={dp.department}>
@@ -165,7 +175,8 @@ const Body = () => {
                     value={value.gender}
                     onChange={(e) =>
                       setValue({ ...value, gender: e.target.value })
-                    }>
+                    }
+                  >
                     <MenuItem value="">None</MenuItem>
                     <MenuItem value="Male">Male</MenuItem>
                     <MenuItem value="Female">Female</MenuItem>
@@ -219,8 +230,16 @@ const Body = () => {
                   setError({});
                 }}
                 className={classes.adminFormClearButton}
-                type="button">
+                type="button"
+              >
                 Clear
+              </button>
+              <button
+                onClick={() => navigate("/admin/managefaculty")}
+                className={classes.adminFormClearButton}
+                type="button"
+              >
+                Back
               </button>
             </div>
             <div className={classes.loadingAndError}>

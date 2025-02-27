@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { useDispatch, useSelector } from "react-redux";
+import { batch, useDispatch, useSelector } from "react-redux";
 import { getSubject } from "../../../redux/actions/adminActions";
 import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
@@ -12,10 +12,7 @@ const Body = () => {
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
-  const [value, setValue] = useState({
-    department: "",
-    year: "",
-  });
+  const user = JSON.parse(localStorage.getItem("user"))
   const [search, setSearch] = useState(false);
 
   useEffect(() => {
@@ -25,13 +22,6 @@ const Body = () => {
     }
   }, [store.errors]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSearch(true);
-    setLoading(true);
-    setError({});
-    dispatch(getSubject(value));
-  };
   const subjects = useSelector((state) => state.admin.subjects.result);
 
   useEffect(() => {
@@ -39,6 +29,7 @@ const Body = () => {
   }, [subjects]);
 
   useEffect(() => {
+    dispatch(getSubject({department: user.result.department, batch: user.result.batch, semester: user.result.semester}));
     dispatch({ type: SET_ERRORS, payload: {} });
   }, []);
 
