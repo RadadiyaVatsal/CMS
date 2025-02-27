@@ -30,7 +30,7 @@ const Body = () => {
     if (!window.confirm(`Are you sure you want to delete the batch ${batch.startYear}-${batch.endYear}?`)) {
       return;
     }
-  
+
     setLoading(true);
     dispatch(deleteBatch({ startYear: batch.startYear, endYear: batch.endYear }))
       .then(() => {
@@ -39,7 +39,7 @@ const Body = () => {
       })
       .catch(() => setLoading(false));
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -57,7 +57,6 @@ const Body = () => {
     <div className="p-5 bg-white rounded-xl shadow-md w-[90%] mx-auto mt-5">
       <h1 className="text-xl font-bold text-gray-700 mb-4">Batch Management</h1>
 
-      {/* Show Add Form Above Table When Button Clicked */}
       {showForm && (
         <div className="bg-gray-100 p-4 rounded-md shadow-md mb-4">
           <h2 className="text-lg font-semibold mb-2">Add New Batch</h2>
@@ -81,9 +80,7 @@ const Body = () => {
               className="w-full p-2 border rounded"
             />
             <div className="flex space-x-4">
-              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">
-                Submit
-              </button>
+              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded">Submit</button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
@@ -96,8 +93,8 @@ const Body = () => {
         </div>
       )}
 
-      {/* Batch Table */}
-      <div className="overflow-x-auto">
+      {/* Scrollable Table Container */}
+      <div className="overflow-y-auto max-h-80 border rounded-md shadow-sm scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr className="bg-gray-100">
@@ -125,7 +122,6 @@ const Body = () => {
         </table>
       </div>
 
-      {/* Add Button Below Table */}
       <div className="mt-4 flex justify-center">
         <button
           onClick={() => setShowForm(true)}
@@ -135,7 +131,6 @@ const Body = () => {
         </button>
       </div>
 
-      {/* Loading & Error Handling */}
       {loading && <Spinner message="Processing..." height={30} width={150} color="#111" />}
       {error.batchError && <p className="text-red-500 mt-2">{error.batchError}</p>}
     </div>
@@ -143,3 +138,4 @@ const Body = () => {
 };
 
 export default Body;
+

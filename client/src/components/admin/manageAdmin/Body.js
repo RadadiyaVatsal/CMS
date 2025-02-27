@@ -63,8 +63,8 @@ const Body = () => {
           </button>
         </div>
       ) : (
-        <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
-          <table className="w-full border-collapse">
+        <div className="overflow-y-auto max-h-96 border rounded-md shadow-sm scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        <table className="min-w-full bg-white border border-gray-200">
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-300 p-2">Name</th>

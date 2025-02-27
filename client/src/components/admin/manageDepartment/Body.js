@@ -97,8 +97,8 @@ const Body = () => {
           </div>
         )}
 
-        {/* Department Table */}
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg p-5">
+        {/* Scrollable Table Container */}
+        <div className="overflow-y-auto max-h-80 bg-white shadow-md rounded-lg p-5 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
           <h2 className="text-lg font-semibold mb-3">Existing Departments</h2>
           <table className="min-w-full border border-gray-200">
             <thead>
