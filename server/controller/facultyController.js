@@ -291,6 +291,40 @@ export const updateAttendance = async (req, res) => {
   }
 }
 
+
+export const getAttendanceByDate = async (req, res) => {
+  try {
+    const { facultyId, subjectId, date } = req.query;
+
+    if (!facultyId || !subjectId || !date) {
+      return res.status(400).json({ message: "Faculty ID, Subject ID, and Date are required." });
+    }
+
+    // Convert date to match database format
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Fetch attendance records for the subject on the given date
+    const attendanceRecords = await Attendance.find({
+      subject: subjectId,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    }).populate("student", "name username semester");
+
+    if (attendanceRecords.length > 0) {
+      return res.status(200).json({ attendanceRecords });
+    } else {
+      return res.status(200).json({ message: "No attendance marked yet." });
+    }
+  } catch (error) {
+    console.error("Error fetching attendance by date:", error);
+    return res.status(500).json({ message: "Server error, please try again later." });
+  }
+};
+
+
+
 export const markAttendance = async (req, res) => {
   try {
     const { subject, selectedStudents, totalStudents } = req.body;

@@ -33,6 +33,7 @@ import {
 const router = express.Router();
 
 router.post("/login", adminLogin);
+router.post("/login", adminLogin);
 router.post("/updatepassword", auth, updatedPassword);
 router.get("/getallstudent", auth, getAllStudent);
 router.post("/createnotice", auth, createNotice);

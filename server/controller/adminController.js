@@ -109,34 +109,41 @@ export const addAdmin = async (req, res) => {
   try {
     const { name, dob, department, contactNumber, avatar, email, joiningYear } =
       req.body;
+
     const errors = { emailError: String };
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
-    const admins = await Admin.find({ department });
 
-    let helper;
-    if (admins.length < 10) {
-      helper = "00" + admins.length.toString();
-    } else if (admins.length < 100 && admins.length > 9) {
-      helper = "0" + admins.length.toString();
-    } else {
-      helper = admins.length.toString();
-    }
-    var date = new Date();
-    var components = ["ADM", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-   
+    do {
+      const adminsCount = await Admin.countDocuments({ department });
+      let helper = (adminsCount + attempt).toString().padStart(3, "0");
+      let date = new Date();
+      let components = ["ADM", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Admin.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increment attempt if username already exists
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
-    const newAdmin = await new Admin({
+
+    const newAdmin = new Admin({
       name,
       email,
       password: hashedPassword,
@@ -148,18 +155,20 @@ export const addAdmin = async (req, res) => {
       dob,
       passwordUpdated,
     });
+
     await newAdmin.save();
+
     return res.status(200).json({
       success: true,
-      message: "Admin registerd successfully",
+      message: "Admin registered successfully",
       response: newAdmin,
     });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.log(error);
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 export const addDummyAdmin = async () => {
   const email = "dummy@gmail.com";
   const password = "123";
@@ -296,36 +305,41 @@ export const addFaculty = async (req, res) => {
       gender,
       designation,
     } = req.body;
+
     const errors = { emailError: String };
     const existingFaculty = await Faculty.findOne({ email });
     if (existingFaculty) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
 
-    const faculties = await Faculty.find({  });
-    let helper = "000";
-    let len = faculties.length + 1;
-    if (faculties.length < 10) {
-      helper = "00" + len.toString();
-    } else if (faculties.length < 100 && faculties.length > 9) {
-      helper = "0" + len.toString();
-    } else {
-      helper = len.toString();
-    }
-    var date = new Date();
-    var components = ["FAC", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-    
+    do {
+      const facultiesCount = await Faculty.countDocuments(); // Count existing faculty members
+      let helper = (facultiesCount + attempt).toString().padStart(3, "0"); // Ensure 3-digit format
+      var date = new Date();
+      var components = ["FAC", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Faculty.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increase attempt to get a unique username
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
 
-    const newFaculty = await new Faculty({
+    const newFaculty = new Faculty({
       name,
       email,
       password: hashedPassword,
@@ -339,16 +353,17 @@ export const addFaculty = async (req, res) => {
       designation,
       passwordUpdated,
     });
+
     await newFaculty.save();
+
     return res.status(200).json({
       success: true,
-      message: "Faculty registerd successfully",
+      message: "Faculty registered successfully",
       response: newFaculty,
     });
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.log(error);
+    res.status(500).json({ backendError: error.message });
   }
 };
 
@@ -674,43 +689,48 @@ export const addStudent = async (req, res) => {
       gender,
       batch,
       fatherName,
-      
-          
     } = req.body;
-    //console.log("Here in server " , req.body);
+
     const errors = { emailError: String };
     const existingStudent = await Student.findOne({ email });
     if (existingStudent) {
       errors.emailError = "Email already exists";
       return res.status(400).json(errors);
     }
+
     const existingDepartment = await Department.findOne({ department });
     let departmentHelper = existingDepartment.departmentCode;
 
-    const students = await Student.find({ department });
-    let helper;
-    if (students.length < 10) {
-      helper = "00" + students.length.toString();
-    } else if (students.length < 100 && students.length > 9) {
-      helper = "0" + students.length.toString();
-    } else {
-      helper = students.length.toString();
-    }
-    var date = new Date();
-    var components = ["STU", date.getFullYear(), departmentHelper, helper];
+    let username;
+    let isUnique = false;
+    let attempt = 1;
 
-    var username = components.join("");
-    let hashedPassword;
-    
+    do {
+      const studentsCount = await Student.countDocuments({ department });
+      let helper = (studentsCount + attempt).toString().padStart(3, "0");
+      let date = new Date();
+      let components = ["STU", date.getFullYear(), departmentHelper, helper];
 
-    hashedPassword = await bcrypt.hash(username, 10);
+      username = components.join("");
+      const existingUsername = await Student.findOne({ username });
+
+      if (!existingUsername) {
+        isUnique = true;
+      } else {
+        attempt++; // Increment attempt if username already exists
+      }
+    } while (!isUnique);
+
+    const hashedPassword = await bcrypt.hash(username, 10);
     var passwordUpdated = false;
 
-     //finding id of batch
-      var batchId = await Batch.findOne({startYear : batch.split('-')[0] , endYear : batch.split('-')[1]});
-      // console.log("Batch id  " , batchId);
+    // Finding batch ID
+    var batchId = await Batch.findOne({
+      startYear: batch.split("-")[0],
+      endYear: batch.split("-")[1],
+    });
 
-    const newStudent = await new Student({
+    const newStudent = new Student({
       name,
       dob,
       password: hashedPassword,
@@ -721,21 +741,21 @@ export const addStudent = async (req, res) => {
       email,
       semester,
       gender,
-      batch : batchId._id,
+      batch: batchId._id,
       fatherName,
       passwordUpdated,
     });
+
     await newStudent.save();
+
     return res.status(200).json({
       success: true,
-      message: "Student registerd successfully",
+      message: "Student registered successfully",
       response: newStudent,
     });
   } catch (error) {
     console.log(error);
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    res.status(500).json({ backendError: error.message });
   }
 };
 

@@ -30,7 +30,7 @@ const Body = () => {
   });
   useEffect(() => {
      if (store.admin.subjectAdded) {
-       navigate("/admin/allsubject");
+       navigate("/admin/managesubject");
      }
    }, [store.admin.subjectAdded, navigate]);
   useEffect(() => {
@@ -247,7 +247,7 @@ const Body = () => {
                 Clear
               </button>
                <button
-                                  onClick={() => navigate("/admin/allsubject")}
+                                  onClick={() => navigate("/admin/managesubject")}
                                   className={classes.adminFormClearButton} // Change this if needed
                                   type="button"
                                 >

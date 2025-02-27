@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 const Body = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const store = useSelector((state) => state);
   const departments = useSelector((state) => state.admin.allDepartment);
   const [loading, setLoading] = useState(false);
@@ -26,20 +27,19 @@ const Body = () => {
     joiningYear: Date().split(" ")[3],
   });
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (Object.keys(store.errors).length !== 0) {
-      setError(store.errors);
-      setValue({ ...value, email: "" });
-    }
-  }, [store.errors]);
-
   useEffect(() => {
     if (store.admin.adminAdded) {
-      navigate("/admin/deleteadmin");
+      navigate("/admin/manageadmin");
     }
   }, [store.admin.adminAdded, navigate]);
+
+  useEffect(() => {
+    if (store.errors && Object.keys(store.errors).length > 0) {
+      console.log("Redux Store Errors:", store.errors);
+      setError(store.errors);
+      setLoading(false);
+    }
+  }, [store.errors]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -47,6 +47,28 @@ const Body = () => {
     setLoading(true);
     dispatch(addAdmin(value));
   };
+
+  useEffect(() => {
+    if (store.admin.adminAdded) {
+      setValue({
+        name: "",
+        dob: "",
+        email: "",
+        department: "",
+        contactNumber: "",
+        avatar: "",
+        joiningYear: Date().split(" ")[3],
+        password: "",
+        username: "",
+      });
+      dispatch({ type: SET_ERRORS, payload: {} });
+      dispatch({ type: ADD_ADMIN, payload: false });
+    }
+  }, [store.admin.adminAdded, dispatch]);
+
+  useEffect(() => {
+    dispatch({ type: SET_ERRORS, payload: {} });
+  }, [dispatch]);
 
   return (
     <div className="flex-[0.8] mt-3">
@@ -85,6 +107,64 @@ const Body = () => {
                     }
                   />
                 </div>
+                <div className={classes.adminForm3}>
+                  <h1 className={classes.adminLabel}>Email :</h1>
+                  <input
+                    placeholder="Email"
+                    required
+                    className={classes.adminInput}
+                    type="email"
+                    value={value.email}
+                    onChange={(e) =>
+                      setValue({ ...value, email: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+              <div className={classes.adminForm2r}>
+                <div className={classes.adminForm3}>
+                  <h1 className={classes.adminLabel}>Department :</h1>
+                  <Select
+                    required
+                    displayEmpty
+                    sx={{ height: 36 }}
+                    inputProps={{ "aria-label": "Without label" }}
+                    value={value.department}
+                    onChange={(e) =>
+                      setValue({ ...value, department: e.target.value })
+                    }
+                  >
+                    <MenuItem value="">None</MenuItem>
+                    {departments?.map((dp, idx) => (
+                      <MenuItem key={idx} value={dp.department}>
+                        {dp.department}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+                <div className={classes.adminForm3}>
+                  <h1 className={classes.adminLabel}>Contact Number :</h1>
+                  <input
+                    required
+                    placeholder="Contact Number"
+                    className={classes.adminInput}
+                    type="number"
+                    value={value.contactNumber}
+                    onChange={(e) =>
+                      setValue({ ...value, contactNumber: e.target.value })
+                    }
+                  />
+                </div>
+                <div className={classes.adminForm3}>
+                  <h1 className={classes.adminLabel}>Avatar :</h1>
+                  <FileBase
+                    type="file"
+                    multiple={false}
+                    onDone={({ base64 }) =>
+                      setValue({ ...value, avatar: base64 })
+                    }
+                  />
+                </div>
               </div>
             </div>
             <div className={classes.adminFormButton}>
@@ -101,29 +181,40 @@ const Body = () => {
                     contactNumber: "",
                     avatar: "",
                     joiningYear: Date().split(" ")[3],
+                    password: "",
+                    username: "",
                   });
                   setError({});
                 }}
                 className={classes.adminFormClearButton}
-                type="button">
+                type="button"
+              >
                 Clear
               </button>
               <button
-                onClick={() => navigate("/admin/deleteadmin")}
-                className={classes.adminFormClearButton}
-                type="button">
+                onClick={() => navigate("/admin/manageadmin")}
+                className={classes.adminFormBackButton}
+                type="button"
+              >
                 Back
               </button>
             </div>
-            {loading && (
-              <Spinner
-                message="Adding Admin"
-                height={30}
-                width={150}
-                color="#111111"
-                messageColor="blue"
-              />
-            )}
+            <div className={classes.loadingAndError}>
+              {loading && (
+                <Spinner
+                  message="Adding Admin"
+                  height={30}
+                  width={150}
+                  color="#111111"
+                  messageColor="blue"
+                />
+              )}
+              {error && Object.keys(error).length > 0 && (
+                <p className="text-red-500">
+                  {error.emailError || error.backendError || "Failed to add admin"}
+                </p>
+              )}
+            </div>
           </form>
         </div>
       </div>

@@ -5,7 +5,7 @@ import Header from "../Header";
 import Sidebar from "../Sidebar";
 import Body from "./Body";
 
-const GetSubject = () => {
+const ManageFaculty = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getAllDepartment());
@@ -23,4 +23,4 @@ const GetSubject = () => {
   );
 };
 
-export default GetSubject;
+export default ManageFaculty;

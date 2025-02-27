@@ -11,6 +11,7 @@ import {
   GET_SUBJECT,
   ATTENDANCE_DELETED,
   UPDATE_ATTENDANCE,
+  GET_STUDENT_FOR_ATTENDANCE
 } from "../actionTypes";
 import * as api from "../api";
 
@@ -102,7 +103,8 @@ export const getStudent = (formData) => async (dispatch) => {
 export const getStudentForAttendance = (subject) => async (dispatch) => {
   try {
     const { data } = await api.getStudentForAttendance({subject});
-    dispatch({ type: GET_STUDENT, payload: data });
+    console.log("Here in actions" , data);
+    dispatch({ type: GET_STUDENT_FOR_ATTENDANCE, payload: data });
   } catch (error) {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }

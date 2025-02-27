@@ -9,6 +9,7 @@ import {
   UPDATE_ATTENDANCE,
   UPDATE_FACULTY,
   UPDATE_PASSWORD,
+  GET_STUDENT_FOR_ATTENDANCE
 } from "../actionTypes";
 
 const initialState = {
@@ -21,6 +22,7 @@ const initialState = {
   tests: [],
   subjects: [],
   attendance: [],
+  students : [],
 };
 
 const facultyReducer = (state = initialState, action) => {
@@ -70,6 +72,11 @@ const facultyReducer = (state = initialState, action) => {
       return {
         ...state,
         attendanceUploaded: action.payload,
+      };
+      case GET_STUDENT_FOR_ATTENDANCE:
+      return {
+        ...state,
+        students : action.payload,
       };
 
     default:

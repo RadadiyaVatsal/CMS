@@ -162,8 +162,12 @@ const Body = () => {
           {selectedSubject ? (
             <SubjectDetails subject={selectedSubject} onClose={() => setSelectedSubject(null)} />
           ) : (
-            <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
-              <table className="w-full table-auto border-collapse border border-gray-300 mt-4">
+            <div className="flex-[0.8] mt-3">
+      <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
+        {/* Ensure proper height for scrollable area */}
+        <div style={{ maxHeight: "400px", overflowY: "auto" , overflowX: "atuo" , width: "100%" }} className="relative overflow-y-scroll max-h-[400px] min-h-[350px] pb-10">
+  <table className="w-full table-auto border-collapse border border-gray-300">
+
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="border border-gray-300 p-2">Sr. No.</th>
@@ -193,10 +197,13 @@ const Body = () => {
                 </tbody>
               </table>
             </div>
+            </div>
+            </div>
           )}
         </div>
       </div>
     </div>
+    
   );
 };
 

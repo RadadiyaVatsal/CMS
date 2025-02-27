@@ -5,7 +5,7 @@ import Header from "../Header";
 import Sidebar from "../Sidebar";
 import Body from "./Body";
 
-const DeleteAdmin = () => {
+const ManageAdmin = () => {
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getAllDepartment());
@@ -30,4 +30,4 @@ const DeleteAdmin = () => {
   );
 };
 
-export default DeleteAdmin;
+export default ManageAdmin;
