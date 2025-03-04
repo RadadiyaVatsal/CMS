@@ -40,3 +40,8 @@ export const ADD_BATCH = "ADD_BATCH";
 export const GET_ALL_BATCH = "GET_ALL_BATCH";
 export const UPDATE_ATTENDANCE = "UPDATE_ATTENDANCE";
 export const GET_STUDENT_FOR_ATTENDANCE = "GET_STUDENT_FOR_ATTENDANCE";
+
+// File Management
+export const FETCH_FILE = "FETCH_FILE";
+export const UPLOAD_FILE = "UPLOAD_FILE";
+export const DELETE_FILE = "DELETE_FILE";

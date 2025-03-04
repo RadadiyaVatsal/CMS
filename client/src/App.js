@@ -49,6 +49,8 @@ import ManageDepartment from "./components/admin/manageDepartment/ManageDepartme
 import ManageFaculty from "./components/admin/getFaculty/ManageFaculty";
 import ManageStudent from "./components/admin/manageStudent/ManageStudent";
 import ManageSubject from "./components/admin/manageSubject/ManageSubject";
+import UploadResources from "./components/faculty/uploadResources/UploadResources";
+import Resources from "./components/student/resources/Body";
 
 
 const App = () => {
@@ -97,6 +99,8 @@ const App = () => {
       <Route path="/faculty/uploadmarks" element={<UploadMarks />} />
       <Route path="/faculty/markattendance" element={<MarkAttendance />} />
 
+      <Route path="/faculty/uploadresources" element={<UploadResources/>} />
+
       {/* Student  */}
 
       <Route path="/login/studentlogin" element={<StudentLogin />} />
@@ -108,6 +112,7 @@ const App = () => {
       <Route path="/student/subjectlist" element={<SubjectList />} />
       <Route path="/student/testresult" element={<TestResult />} />
       <Route path="/student/attendance" element={<Attendance />} />
+      <Route path="/student/resources" element={<Resources />} />
     </Routes>
   );
 };

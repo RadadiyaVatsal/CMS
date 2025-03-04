@@ -101,6 +101,10 @@ export const markAttendance = (data) =>
   API.post("/api/faculty/markattendance", data);
 export const updateAttendance = (data) =>
   API.post("/api/faculty/updateattendance", data);
+export const uploadFile = (fileData) => API.post("/api/faculty/upload", fileData);
+export const getFiles = (facultyId , subjectId) => API.get(`/api/faculty/files?facultyId=${facultyId}&subjectId=${subjectId}`);
+export const downloadFile = (fileId) => API.get(`/api/faculty/download/${fileId}`, { responseType: 'blob' });
+export const deleteFile = (fileId) => API.delete(`/api/faculty/file/${fileId}`);
 
 // Student
 export const studentSignIn = (formData) =>
@@ -118,3 +122,6 @@ export const getAttendance = (attendance) =>
   
 export const getTestMarks = (data) => 
   API.post("/api/faculty/gettestmarks", data);
+
+export const getResources = (subjectId) => API.get(`/api/student/files?subjectId=${subjectId}`);
+export const downloadResource = (fileId) => API.get(`/api/student/download/${fileId}`, { responseType: 'blob' });

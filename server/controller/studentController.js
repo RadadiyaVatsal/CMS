@@ -6,7 +6,7 @@ import Marks from "../models/marks.js";
 import Attendence from "../models/attendance.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-
+import File from "../models/file.js";
 export const studentLogin = async (req, res) => {
   const { username, password } = req.body;
   const errors = { usernameError: String, passwordError: String };
@@ -207,5 +207,57 @@ export const attendance = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json(error);
+  }
+};
+
+import path from "path";
+
+export const downloadFile = async (req, res) => {
+  try {
+    // console.log("We are here inside controller");
+    
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    const filePath = path.resolve(file.path); // Ensure correct file path
+    console.log("Downloading file from:", filePath);
+
+    res.download(filePath, file.originalname, (err) => {
+      if (err) {
+        console.error("Error downloading file:", err);
+        res.status(500).json({ message: "Download failed", error: err });
+      }
+    });
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).json({ message: "Download failed", error });
+  }
+};
+
+export const getFiles = async (req, res) => {
+  try {
+    const {  subjectId } = req.query; // Make sure frontend sends these as query params
+
+    // console.log("Received facultyId:", facultyId);
+    // console.log("Received subjectId:", subjectId);
+
+
+    let query = { subjectId }; // Always filter by facultyId
+
+     if(subjectId == ""){
+      const files = await File.find().sort({ uploadDate: -1 }); // Fetch data from DB
+      console.log("Fetched Files:", files);
+       return  res.json(files);
+     }
+
+    console.log("Query:", query);
+
+    const files = await File.find(query).sort({ uploadDate: -1 }); // Fetch data from DB
+    console.log("Fetched Files:", files);
+       return  res.json(files);
+    // return res.status(200).json({ message: "Successfully fetched", files });
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    return res.status(500).json({ message: "Fetching failed", error });
   }
 };

@@ -1,34 +1,33 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, MenuItem, Select } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
 import {
   getStudentForAttendance,
   markAttendance,
-  updateAttendance,
   getSubject,
 } from "../../../redux/actions/facultyActions";
 import { SET_ERRORS, ATTENDANCE_MARKED } from "../../../redux/actionTypes";
-import axios from "axios";
 
 const Attendance = () => {
   const dispatch = useDispatch();
   const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch data from Redux
   const subjects = useSelector((state) => state.admin.subjects?.result || []);
-  const students = useSelector((state) => state.admin.students || []);
-  const errors = useSelector((state) => state.errors);
-  let attendance = useSelector((state) => state.faculty.attendance.alreadyAdded);
-  const attendanceUploaded = useSelector((state) => state.faculty.attendanceUploaded);
+  const students = useSelector(
+    (state) => state.faculty.attendanceData?.students || []
+  );
+  const attendance = useSelector(
+    (state) => state.faculty.attendanceData?.attendance || []
+  );
+  const attendanceUploaded = useSelector(
+    (state) => state.faculty.attendanceUploaded
+  );
 
-  // State
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
   const [checkedValue, setCheckedValue] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [attendanceRecords, setAttendanceRecords] = useState([]);
-  const inputRef = useRef([]);
 
   useEffect(() => {
     dispatch(getSubject({ faculty: user.result._id }));
@@ -38,24 +37,15 @@ const Attendance = () => {
   useEffect(() => {
     if (selectedSubject) {
       setLoading(true);
-      dispatch(getStudentForAttendance(selectedSubject))
+      dispatch(getStudentForAttendance(selectedSubject, selectedDate))
         .then(() => setLoading(false))
         .catch(() => setLoading(false));
-      dispatch(updateAttendance(selectedSubject));
     }
-  }, [dispatch, selectedSubject]);
+  }, [dispatch, selectedSubject, selectedDate]);
 
   useEffect(() => {
-    setTimeout(() => {
-      attendance?.forEach((a, idx) => {
-        if (inputRef.current[idx]) {
-          inputRef.current[idx].checked = a.attended;
-          if (a.attended) {
-            setCheckedValue((prev) => [...prev, a.student]);
-          }
-        }
-      });
-    }, 0);
+    const temp = attendance.filter((a) => a.attended).map((a) => a.student);
+    setCheckedValue(temp);
   }, [attendance]);
 
   useEffect(() => {
@@ -77,41 +67,12 @@ const Attendance = () => {
   };
 
   const uploadAttendance = () => {
-    if (!selectedSubject) {
-      return alert("Please select a subject.");
-    }
-    if (checkedValue.length === 0) {
-      return alert("Please select at least one student.");
-    }
+    if (!selectedSubject) return alert("Please select a subject.");
     setLoading(true);
     dispatch(markAttendance(checkedValue, selectedSubject, students)).finally(
       () => setLoading(false)
     );
   };
-
-  useEffect(() => {
-    const fetchAttendanceByDate = async () => {
-      if (!selectedSubject || !selectedDate) return;
-
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/attendance/by-date?facultyId=${user.result._id}&date=${selectedDate}`
-        );
-        setAttendanceRecords(response.data.attendanceRecords || []);
-
-        // Pre-check checkboxes for students with attendance marked
-        const attendedStudents = response.data.attendanceRecords.map((record) => record.student._id);
-        setCheckedValue(attendedStudents);
-      } catch (error) {
-        console.error("Error fetching attendance by date:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAttendanceByDate();
-  }, [selectedSubject, selectedDate]);
 
   const isToday = selectedDate === dayjs().format("YYYY-MM-DD");
 
@@ -157,46 +118,49 @@ const Attendance = () => {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student, idx) => {
-                  const isPresent = checkedValue.includes(student._id);
-                  return (
-                    <tr key={student._id} className="bg-white border-b hover:bg-gray-50">
-                      <td className="border p-2 text-center">
-                        {isToday ? (
-                          <input
-                            ref={(checkboxInput) => (inputRef.current[idx] = checkboxInput)}
-                            type="checkbox"
-                            value={student._id}
-                            checked={isPresent}
-                            onChange={handleInputChange}
-                            className="w-4 h-4"
-                          />
-                        ) : (
-                          <span className={`font-bold ${isPresent ? "text-green-600" : "text-red-600"}`}>
-                            {isPresent ? "P" : "A"}
-                          </span>
-                        )}
-                      </td>
-                      <td className="border p-2 text-center">{idx + 1}</td>
-                      <td className="border p-2">{student.name}</td>
-                      <td className="border p-2">{student.username}</td>
-                    </tr>
-                  );
-                })}
+                {students.map((student, idx) => (
+                  <tr
+                    key={student._id}
+                    className="bg-white border-b hover:bg-gray-50"
+                  >
+                    <td className="border p-2 text-center">
+                      {isToday ? (
+                        <input
+                          type="checkbox"
+                          value={student._id}
+                          checked={checkedValue.includes(student._id)}
+                          onChange={handleInputChange}
+                          className="w-4 h-4"
+                        />
+                      ) : (
+                        <span
+                          className={`px-3 py-1 text-sm font-semibold rounded-md 
+                          ${checkedValue.includes(student._id) ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"}`}
+                        >
+                          {checkedValue.includes(student._id) ? "Present" : "Absent"}
+                        </span>
+                      )}
+                    </td>
+                    <td className="border p-2 text-center">{idx + 1}</td>
+                    <td className="border p-2">{student.name}</td>
+                    <td className="border p-2">{student.username}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           )}
         </div>
       </div>
-
-      {isToday && (
+      {isToday ? (
         <button
           className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           onClick={uploadAttendance}
         >
-          {attendance?.length === 0 ? "Mark Attendance" : "Update Attendance"}
+          {attendance.length === 0 ? "Mark Attendance" : "Update Attendance"}
         </button>
-      )}
+      ) : attendance.length === 0 ? (
+        <p className="mt-4 text-red-500 font-semibold">No attendance marked for this day.</p>
+      ) : null}
     </div>
   );
 };

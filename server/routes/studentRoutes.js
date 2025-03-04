@@ -5,6 +5,8 @@ import {
   updateStudent,
   testResult,
   attendance,
+  getFiles,
+  downloadFile
 } from "../controller/studentController.js";
 import auth from "../middleware/auth.js";
 
@@ -15,5 +17,6 @@ router.post("/updatepassword", auth, updatedPassword);
 router.post("/updateprofile", auth, updateStudent);
 router.post("/testresult", auth, testResult);
 router.post("/attendance", auth, attendance);
-
+router.get("/files", auth, getFiles);
+router.get("/download/:id", auth, downloadFile);
 export default router;

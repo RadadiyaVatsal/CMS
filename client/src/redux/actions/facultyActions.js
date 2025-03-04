@@ -11,9 +11,12 @@ import {
   GET_SUBJECT,
   ATTENDANCE_DELETED,
   UPDATE_ATTENDANCE,
-  GET_STUDENT_FOR_ATTENDANCE
+  GET_STUDENT_FOR_ATTENDANCE,
+  UPLOAD_FILE,
+ DELETE_FILE,
+ FETCH_FILE
 } from "../actionTypes";
-import * as api from "../api";
+import * as api from "../api/";
 
 export const facultySignIn = (formData, navigate) => async (dispatch) => {
   try {
@@ -100,9 +103,9 @@ export const getStudent = (formData) => async (dispatch) => {
   }
 };
 
-export const getStudentForAttendance = (subject) => async (dispatch) => {
+export const getStudentForAttendance = (subject, date) => async (dispatch) => {
   try {
-    const { data } = await api.getStudentForAttendance({subject});
+    const { data } = await api.getStudentForAttendance({subject, date});
     console.log("Here in actions" , data);
     dispatch({ type: GET_STUDENT_FOR_ATTENDANCE, payload: data });
   } catch (error) {
@@ -152,3 +155,61 @@ export const updateAttendance = (subject) => async (dispatch) => {
     dispatch({ type: SET_ERRORS, payload: error.response.data });
   }
 }
+
+export const uploadFile = (formData) => async (dispatch) => {
+  try {
+    const { data } = await api.uploadFile(formData); // API call to upload file
+    dispatch({ type: UPLOAD_FILE, payload: data.file });  
+    alert("File uploaded successfully");
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response?.data || "File upload failed" });
+  }
+};
+
+// ✅ Delete File Action
+export const deleteFile = (fileId) => async (dispatch) => {
+  try {
+    await api.deleteFile(fileId); // API call to delete file
+    dispatch({ type: DELETE_FILE, payload: fileId });  
+    alert("File deleted successfully");
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response?.data || "File deletion failed" });
+  }
+};
+
+// ✅ Fetch Files Action
+// export const fetchFiles = () => async (dispatch) => {
+//   try {
+//     const { data } = await api.getFiles(); // API call to get files
+//     dispatch({ type: FETCH_FILE, payload: data });  
+//   } catch (error) {
+//     dispatch({ type: SET_ERRORS, payload: error.response?.data || "Fetching files failed" });
+//   }
+// };
+
+export const fetchFiles = (facultyId, subjectId = "") => async (dispatch) => {
+  try {
+    console.log("Fetching files for:", { facultyId, subjectId }); // 
+
+    const { data } = await api.getFiles(facultyId, subjectId); // Pass facultyId & subjectId
+    dispatch({ type: FETCH_FILE, payload: data });
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response?.data || "Fetching files failed" });
+  }
+};
+
+export const downloadFile = (fileId, fileName) => async (dispatch) => {
+  console.log("Inside faculty Actions");
+  try {
+    const response = await api.downloadFile(fileId); // API call to download file
+    const blob = new Blob([response.data]); // Create a blob from response data
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute("download", fileName); // Set file name for download
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  } catch (error) {
+    dispatch({ type: SET_ERRORS, payload: error.response?.data || "File download failed" });
+  }
+};

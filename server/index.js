@@ -17,7 +17,7 @@ app.use(cors());
 app.use("/api/admin", adminRoutes);
 app.use("/api/faculty", facultyRoutes);
 app.use("/api/student", studentRoutes);
-
+// app.use("api/faculty/upload", express.static(path.join(__dirname, "uploads")));
 const PORT = process.env.PORT || 5001;
 app.get("/", (req, res) => {
   res.send("Hello to college erp API");

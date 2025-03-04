@@ -181,21 +181,35 @@ export const getSubject = async (req, res) => {
 
 export const getStudentForAttendence = async (req, res) => {
   try {
-    const { subject } = req.body;
+    const { subject, date } = req.body;
     const errors = { noSubject: String, noStudent: String };
     if (!subject) {
       errors.noSubject = "No subject found";
       return res.status(404).json(errors);
     }
-
     const { batch, semester, department } = await Subject.findById(subject);
     const students = await Student.find({ batch, semester, department });
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const attendance = await Attendence.find({
+        createdAt: {
+            $gte: startOfDay,
+            $lt: endOfDay
+        }
+     , subject : subject});
+    //  console.log(attendance);
+    //  console.log(students);
 
+  
     if (!students || students.length == 0) {
       errors.noStudent = "No students found";
-      return res.status(500).json(errors);
+      return res.status(200).json({students, attendance});
     }
-    return res.status(200).json(students);
+    return res.status(200).json({students, attendance});
   } catch (error) {
     return res.status(500).json(error);
   }
@@ -328,6 +342,8 @@ export const getAttendanceByDate = async (req, res) => {
 export const markAttendance = async (req, res) => {
   try {
     const { subject, selectedStudents, totalStudents } = req.body;
+    // console.log("selected students: ", selectedStudents)
+    // console.log("total students: ", totalStudents)
 
     // Get the current date's start and end (to filter records by date only)
     const startOfDay = new Date();
@@ -349,7 +365,7 @@ export const markAttendance = async (req, res) => {
         const val = selectedStudents.includes(student._id);
         
         const res = await Attendence.updateOne(
-          { student: student._id, subject: subject }, // Filter criteria
+          { student: student._id, subject: subject, createdAt: { $gte: startOfDay, $lte: endOfDay } }, // Filter criteria
           { $set: { attended: val } }, // Update operation
           { new: true, runValidators: true }
         );
@@ -371,4 +387,132 @@ export const markAttendance = async (req, res) => {
   } catch (error) {
     res.status(500).json({ backendError: error.message });
   }
+};
+
+import fs from 'fs';
+import File from '../models/file.js';
+
+export const uploadFile = async (req, res) => {
+    try {
+       console.log(req.body);
+        const file = new File({
+            filename: req.file.filename,
+            originalname: req.file.originalname,
+            path: req.file.path,
+            uploadedBy: req.body.facultyId,
+            subjectId : req.body.subjectId
+        });
+        await file.save();
+        res.status(201).json({ message: 'File uploaded successfully', file });
+    } catch (error) {
+        res.status(500).json({ message: 'Upload failed', error });
+    }
+};
+
+// export const getFiles = async (_req, res) => {
+//     try {
+//         const files = await File.find();
+//         res.json(files);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Failed to fetch files', error });
+//     }
+// };
+
+// export const getFiles = async (req, res) => {
+//   try {
+//       const { facultyId, subjectId } = req.body;
+        
+//       // Ensure facultyId is provided
+//       if (!facultyId) {
+//           return res.status(400).json({ message: "Faculty ID is required" });
+//       }
+     
+//       if(!subjectId){
+//          const files=File.find({subjectId : subjectId});
+//          res.json(files);
+//          return res.status(200).json({message : " Successfully fatched"});
+//       }
+//       else{
+//         const files=File.find();
+//         res.json(files);
+//         return res.status(200).json({message : " Successfully fatched"});
+//       }
+//       }
+//     catch(error){
+//       res.status(500).json({ message: 'Fatching failed', error });
+//     }
+    
+// };
+
+export const getFiles = async (req, res) => {
+  try {
+    const { facultyId, subjectId } = req.query; // Make sure frontend sends these as query params
+
+    // console.log("Received facultyId:", facultyId);
+    // console.log("Received subjectId:", subjectId);
+    //  console.log(req.body);
+    if (!facultyId) {
+      return res.status(400).json({ message: "Faculty ID is required" });
+    }
+
+    if(subjectId === ""){
+      console.log(facultyId);
+      const files = await File.find({uploadedBy : facultyId}).sort({ uploadDate: -1 }); // Fetch data from DB
+      // console.log("Fetched Files:", files);
+         return  res.json(files);
+    }
+
+    let query = { facultyId }; // Always filter by facultyId
+
+    if (subjectId) {
+      query.subjectId = subjectId; // If subject is selected, filter by subjectId
+    }
+
+    console.log("Query:", query);
+
+    const files = await File.find(query).sort({ uploadDate: -1 }); // Fetch data from DB
+    console.log("Fetched Files:", files);
+       return  res.json(files);
+    // return res.status(200).json({ message: "Successfully fetched", files });
+  } catch (error) {
+    console.error("Error fetching files:", error);
+    return res.status(500).json({ message: "Fetching failed", error });
+  }
+};
+
+import path from "path";
+
+export const downloadFile = async (req, res) => {
+  try {
+    // console.log("We are here inside controller");
+    
+    const file = await File.findById(req.params.id);
+    if (!file) return res.status(404).json({ message: "File not found" });
+
+    const filePath = path.resolve(file.path); // Ensure correct file path
+    console.log("Downloading file from:", filePath);
+
+    res.download(filePath, file.originalname, (err) => {
+      if (err) {
+        console.error("Error downloading file:", err);
+        res.status(500).json({ message: "Download failed", error: err });
+      }
+    });
+  } catch (error) {
+    console.error("Download error:", error);
+    res.status(500).json({ message: "Download failed", error });
+  }
+};
+
+
+export const deleteFile = async (req, res) => {
+    try {
+        const file = await File.findById(req.params.id);
+        if (!file) return res.status(404).json({ message: 'File not found' });
+        fs.unlinkSync(file.path);
+        await file.deleteOne();
+        res.json({ message: 'File deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Delete failed', error });
+    }
 };

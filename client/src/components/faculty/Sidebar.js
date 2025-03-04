@@ -78,6 +78,14 @@ const Sidebar = () => {
             <EngineeringIcon className="" />
             <h1 className="font-normal">Mark Attendance</h1>
           </NavLink>
+          <NavLink
+            to="/faculty/uploadresources"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <EngineeringIcon className="" />
+            <h1 className="font-normal">Upload Resources</h1>
+          </NavLink>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   UPDATE_PASSWORD,
   TEST_RESULT,
   ATTENDANCE,
+  FETCH_FILE
 } from "../actionTypes";
 
 const initialState = {
@@ -17,6 +18,7 @@ const initialState = {
   testResult: ["something something bolo"],
   tests: [],
   attendance: [],
+  resources : [],
 };
 
 const studentReducer = (state = initialState, action) => {
@@ -46,7 +48,9 @@ const studentReducer = (state = initialState, action) => {
       return {
         ...state,
         attendance: action.payload,
-      };
+      }; 
+      case FETCH_FILE:
+            return { ...state, resources: action.payload, error: null };
 
     default:
       return state;

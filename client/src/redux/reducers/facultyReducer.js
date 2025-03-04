@@ -9,7 +9,10 @@ import {
   UPDATE_ATTENDANCE,
   UPDATE_FACULTY,
   UPDATE_PASSWORD,
-  GET_STUDENT_FOR_ATTENDANCE
+  GET_STUDENT_FOR_ATTENDANCE,
+  DELETE_FILE,
+  UPLOAD_FILE,
+  FETCH_FILE
 } from "../actionTypes";
 
 const initialState = {
@@ -22,7 +25,9 @@ const initialState = {
   tests: [],
   subjects: [],
   attendance: [],
-  students : [],
+  attendanceData: {},
+  files: [], // File management state
+  error: null 
 };
 
 const facultyReducer = (state = initialState, action) => {
@@ -30,53 +35,50 @@ const facultyReducer = (state = initialState, action) => {
     case FACULTY_LOGIN:
       localStorage.setItem("user", JSON.stringify({ ...action?.data }));
       return { ...state, authData: action?.data };
+
     case LOGOUT:
       localStorage.clear();
       return { ...state, authData: null };
+
     case UPDATE_PASSWORD:
-      return {
-        ...state,
-        updatedPassword: action.payload,
-      };
+      return { ...state, updatedPassword: action.payload };
+
     case UPDATE_FACULTY:
-      return {
-        ...state,
-        updatedFaculty: action.payload,
-      };
-    case UPDATE_ATTENDANCE: 
-      return {
-        ...state, 
-        attendance: action.payload,
-      }
+      return { ...state, updatedFaculty: action.payload };
+
+    case UPDATE_ATTENDANCE:
+      return { ...state, attendance: action.payload };
+
     case ADD_TEST:
-      return {
-        ...state,
-        testAdded: action.payload,
-      };
-    case GET_SUBJECT: 
-      return {
-        ...state,
-        subjects: action.payload,
-      }
+      return { ...state, testAdded: action.payload };
+
+    case GET_SUBJECT:
+      return { ...state, subjects: action.payload };
+
     case GET_TEST:
-      return {
-        ...state,
-        tests: action.payload,
-      };
+      return { ...state, tests: action.payload };
+
     case MARKS_UPLOADED:
-      return {
-        ...state,
-        marksUploaded: action.payload,
-      };
+      return { ...state, marksUploaded: action.payload };
+
     case ATTENDANCE_MARKED:
+      return { ...state, attendanceUploaded: action.payload };
+
+    case GET_STUDENT_FOR_ATTENDANCE:
+      return { ...state, attendanceData: action.payload };
+
+    // File Management Actions
+    case FETCH_FILE:
+      return { ...state, files: action.payload, error: null };
+
+    case UPLOAD_FILE:
+      return { ...state, files: [...state.files, action.payload], error: null };
+
+    case DELETE_FILE:
       return {
         ...state,
-        attendanceUploaded: action.payload,
-      };
-      case GET_STUDENT_FOR_ATTENDANCE:
-      return {
-        ...state,
-        students : action.payload,
+        files: state.files.filter((file) => file._id !== action.payload),
+        error: null,
       };
 
     default:

@@ -79,6 +79,16 @@ const Sidebar = () => {
             <h1 className="font-normal">Subject List</h1>
           </NavLink>
         </div>
+        <div className="">
+          <NavLink
+            to="/student/resources"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <EngineeringIcon className="" />
+            <h1 className="font-normal"> Resources</h1>
+          </NavLink>
+        </div>
       </div>
     </div>
   );
