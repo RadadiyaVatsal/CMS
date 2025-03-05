@@ -25,7 +25,7 @@ const StudentHome = () => {
     //     user.result.section
     //   )
     // );
-    dispatch(getTestResult({studentId: user.result._id}));
+    // dispatch(getTestResult({studentId: user.result._id}));
     dispatch(getNotice());
   }, [dispatch]);
 

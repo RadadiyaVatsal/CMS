@@ -2421,6 +2421,37 @@ adjust-sourcemap-loader@^4.0.0:
     loader-utils "^2.0.0"
     regex-parser "^2.2.11"
 
+ag-charts-community@11.1.1:
+  version "11.1.1"
+  resolved "https://registry.npmjs.org/ag-charts-community/-/ag-charts-community-11.1.1.tgz"
+  integrity sha512-ja+JyTICjo2Ic3dG90f3ylD7EqF6Vet7JtiPZa6b9Ffov7VP1DnHUmZsJKfzlQVrWMR6H8Yw/Ij2izLy3hxGZA==
+  dependencies:
+    ag-charts-core "11.1.1"
+    ag-charts-locale "11.1.1"
+    ag-charts-types "11.1.1"
+
+ag-charts-core@11.1.1:
+  version "11.1.1"
+  resolved "https://registry.npmjs.org/ag-charts-core/-/ag-charts-core-11.1.1.tgz"
+  integrity sha512-18VuqqzA2uC/flzz/Ry/ByYVWbbJA9/IlO5qLokdpXqLzWfO8FVWcCJ7IOu9+L+LRhREyqSCnVaa+THCVCe14w==
+
+ag-charts-locale@11.1.1:
+  version "11.1.1"
+  resolved "https://registry.npmjs.org/ag-charts-locale/-/ag-charts-locale-11.1.1.tgz"
+  integrity sha512-yEsC83zUTQ29GG8absKfiVNmDV0NkeoUx1uYy9Qyor/r5zU0B9Ve8/pHSB9jK0OYGH7/ayu1BNBzrXacPr2QPA==
+
+ag-charts-react@^11.1.1:
+  version "11.1.1"
+  resolved "https://registry.npmjs.org/ag-charts-react/-/ag-charts-react-11.1.1.tgz"
+  integrity sha512-SWRPA07LbAGegkVxv562ieKXcpHZE5AfXlwluAr0qTmwu7AMbkURiOs16TKLF7xIdXVwgoss3IHqZjnRtH/dkw==
+  dependencies:
+    ag-charts-community "11.1.1"
+
+ag-charts-types@11.1.1:
+  version "11.1.1"
+  resolved "https://registry.npmjs.org/ag-charts-types/-/ag-charts-types-11.1.1.tgz"
+  integrity sha512-bRmUcf5VVhEEekhX8Vk0NSwa8Te8YM/zchjyYKR2CX4vDYiwoohM1Jg9RFvbIhVbLC1S6QrPEbx5v2C6RDfpSA==
+
 agent-base@6:
   version "6.0.2"
   resolved "https://registry.npmjs.org/agent-base/-/agent-base-6.0.2.tgz"
@@ -7856,7 +7887,7 @@ react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-react@*, "react@^16.0.0 || ^17.0.0", "react@^16.3.0 || ^17.0.0-0", "react@^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.3 || ^17", "react@^16.x || ^17.x || ^18.x || ^19.0.0 || ^19.0.0-rc", react@^17.0.0, react@^17.0.2, "react@>= 16", react@>=16, react@>=16.6.0, react@>=16.8, react@>=16.8.0, react@17.0.2:
+react@*, "react@^16.0.0 || ^17.0.0", "react@^16.3.0 || ^17.0.0-0", "react@^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0", "react@^16.8.3 || ^17", "react@^16.x || ^17.x || ^18.x || ^19.0.0 || ^19.0.0-rc", react@^17.0.0, react@^17.0.2, "react@^18.0.0 || ^19.0.0", "react@>= 16", react@>=16, react@>=16.6.0, react@>=16.8, react@>=16.8.0, react@17.0.2:
   version "17.0.2"
   resolved "https://registry.npmjs.org/react/-/react-17.0.2.tgz"
   integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==

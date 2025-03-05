@@ -14,6 +14,7 @@ const Body = () => {
   const store = useSelector((state) => state);
   const user = JSON.parse(localStorage.getItem("user"))
   const [search, setSearch] = useState(false);
+  const subjects = useSelector((state) => state.admin.subjects.result);
 
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
@@ -22,13 +23,13 @@ const Body = () => {
     }
   }, [store.errors]);
 
-  const subjects = useSelector((state) => state.admin.subjects.result);
 
   useEffect(() => {
     if (subjects?.length !== 0) setLoading(false);
   }, [subjects]);
 
   useEffect(() => {
+    setLoading(true);
     dispatch(getSubject({department: user.result.department, batch: user.result.batch, semester: user.result.semester}));
     dispatch({ type: SET_ERRORS, payload: {} });
   }, []);

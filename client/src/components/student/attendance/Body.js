@@ -6,20 +6,27 @@ import { MenuItem, Select } from "@mui/material";
 import Spinner from "../../../utils/Spinner";
 import { SET_ERRORS } from "../../../redux/actionTypes";
 import * as classes from "../../../utils/styles";
+import { AgCharts } from "ag-charts-react";
 
 const Body = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState({});
   const attendance = useSelector((state) => state.student.attendance);
+  const chartData = [
+    { subject: "Math", attended: 9, total: 10 },
+    { subject: "Science", attended: 12, total: 15 },
+    { subject: "English", attended: 6, total: 8 },
+    { subject: "History", attended: 5, total: 10 },
+  ];
 
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
 
   const [search, setSearch] = useState(false);
 
-  useEffect(() => {    
-    console.log(attendance.result)
-  }, [attendance])
+  useEffect(() => {
+    console.log(attendance.result);
+  }, [attendance]);
 
   useEffect(() => {
     if (Object.keys(store.errors).length !== 0) {
@@ -63,7 +70,7 @@ const Body = () => {
                 </p>
               )}
             </div>
-            {!loading &&
+            {/* {!loading &&
               Object.keys(error).length === 0 &&
               subjects?.length !== 0 && (
                 <div className={classes.adminData}>
@@ -118,7 +125,31 @@ const Body = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
+            <AgCharts
+              options={{
+                title: {
+                  text: "Attendance Summary",
+                },
+                data: chartData,
+                tooltip: {
+                  renderer: function ({ datum }) {
+                    return {
+                      title: datum.subject, // Subject name as the title
+                      content: `${datum.attended}/${datum.total}`, // Show "Attended / Total"
+                    };
+                  },
+                },
+                series: [
+                  {
+                    type: "bar",
+                    xKey: "subject",
+                    yKey: "attended",
+                    yName: "Attended Lectures",
+                  },
+                ],
+              }}
+            />
           </div>
         </div>
       </div>

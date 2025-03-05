@@ -50,7 +50,7 @@ import ManageFaculty from "./components/admin/getFaculty/ManageFaculty";
 import ManageStudent from "./components/admin/manageStudent/ManageStudent";
 import ManageSubject from "./components/admin/manageSubject/ManageSubject";
 import UploadResources from "./components/faculty/uploadResources/UploadResources";
-import Resources from "./components/student/resources/Body";
+import Resources from "./components/student/resources/Resources";
 
 
 const App = () => {
