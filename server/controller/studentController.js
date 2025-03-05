@@ -196,7 +196,7 @@ export const attendance = async (req, res) => {
     });
     const unique = attendenceData.reduce((acc, obj) => {
       if (!acc.some(item => item.subjectCode === obj.subject.subjectCode)) {
-        acc.push({subjectCode: obj.subject.subjectCode, subjectName: obj.subject.subjectName, percentage: (attendedLec[obj.subject.subjectCode][1]/attendedLec[obj.subject.subjectCode][0])*100});
+        acc.push({subjectCode: obj.subject.subjectCode, subject: obj.subject.subjectName, attended: (attendedLec[obj.subject.subjectCode][0]), total: attendedLec[obj.subject.subjectCode][1]});
       }
       return acc;
     }, []);

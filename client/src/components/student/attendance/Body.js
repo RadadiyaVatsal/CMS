@@ -12,12 +12,7 @@ const Body = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState({});
   const attendance = useSelector((state) => state.student.attendance);
-  const chartData = [
-    { subject: "Math", attended: 9, total: 10 },
-    { subject: "Science", attended: 12, total: 15 },
-    { subject: "English", attended: 6, total: 8 },
-    { subject: "History", attended: 5, total: 10 },
-  ];
+  const [chartData, setChartData] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
@@ -25,7 +20,7 @@ const Body = () => {
   const [search, setSearch] = useState(false);
 
   useEffect(() => {
-    console.log(attendance.result);
+    setChartData(attendance.result)
   }, [attendance]);
 
   useEffect(() => {
