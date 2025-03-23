@@ -25,7 +25,7 @@ import FacultyUpdate from "./components/faculty/profile/update/Update";
 import UploadMarks from "./components/faculty/uploadMarks/UploadMarks";
 import AdminLogin from "./components/login/adminLogin/AdminLogin";
 import FacultyLogin from "./components/login/facultyLogin/FacultyLogin";
-import Login from "./components/login/Login";
+import Login from "./components/login/Landing";
 
 import StudentLogin from "./components/login/studentLogin/StudentLogin";
 import StudentFirstTimePassword from "./components/student/profile/update/firstTimePassword/FirstTimePassword";
@@ -51,12 +51,13 @@ import ManageStudent from "./components/admin/manageStudent/ManageStudent";
 import ManageSubject from "./components/admin/manageSubject/ManageSubject";
 import UploadResources from "./components/faculty/uploadResources/UploadResources";
 import Resources from "./components/student/resources/Resources";
+import Landing from "./components/login/Landing";
 
 
 const App = () => {
   return (
     <Routes>
-      <Route exact path="/" element={<Login />} />
+      <Route exact path="/" element={<Landing />} />
 
       {/* Admin  */}
 
