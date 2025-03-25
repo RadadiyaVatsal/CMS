@@ -15,7 +15,7 @@ const initialState = {
   testAdded: false,
   marksUploaded: false,
   attendanceUploaded: false,
-  testResult: ["something something bolo"],
+  testResult: [],
   tests: [],
   attendance: [],
   resources : [],

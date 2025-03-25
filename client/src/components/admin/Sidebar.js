@@ -135,6 +135,16 @@ const Sidebar = () => {
             <h1 className="font-normal">Manage Subjects</h1>
           </NavLink>
         </div>
+        <div>
+          <NavLink
+            to="/admin/reports"
+            className={({ isActive }) =>
+              isActive ? isActiveStyle : isNotActiveStyle
+            }>
+            <MenuBookIcon />
+            <h1 className="font-normal">Reports</h1>
+          </NavLink>
+        </div>
       </div>
     </div>
   );

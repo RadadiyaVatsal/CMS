@@ -95,7 +95,7 @@ const Body = () => {
 
       {/* Scrollable Table Container */}
       <div className="overflow-y-auto max-h-80 border rounded-md shadow-sm scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
-        <table className="min-w-full bg-white border border-gray-200">
+        <table className="min-w-full bg-white border border-gray-200 ">
           <thead>
             <tr className="bg-gray-100">
               <th className="px-4 py-2 text-left">Start Year</th>

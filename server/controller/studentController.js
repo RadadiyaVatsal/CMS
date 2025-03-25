@@ -140,6 +140,7 @@ export const updateStudent = async (req, res) => {
 export const testResult = async (req, res) => {
   try {
     const { studentId } = req.body;
+    console.log(studentId);
     const errors = { notestError: String };
     const result = await Marks.find({ student: studentId });
     let answer = [];
@@ -209,6 +210,17 @@ export const attendance = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+export const getStudentDetails = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) return res.status(400).json({message: "student id not found"});
+
+  const student = await Student.findById(id).populate("batch");
+  if (!student) return res.status(500).json({message: "no student found"});
+
+  return res.status(200).json(student);
+}
 
 import path from "path";
 

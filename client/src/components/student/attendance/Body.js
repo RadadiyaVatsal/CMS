@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { useDispatch, useSelector } from "react-redux";
-import { getSubject } from "../../../redux/actions/adminActions";
-import { MenuItem, Select } from "@mui/material";
-import Spinner from "../../../utils/Spinner";
 import { SET_ERRORS } from "../../../redux/actionTypes";
+import Spinner from "../../../utils/Spinner";
 import * as classes from "../../../utils/styles";
 import { AgCharts } from "ag-charts-react";
 
@@ -13,14 +11,19 @@ const Body = () => {
   const [error, setError] = useState({});
   const attendance = useSelector((state) => state.student.attendance);
   const [chartData, setChartData] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const store = useSelector((state) => state);
 
-  const [search, setSearch] = useState(false);
-
   useEffect(() => {
-    setChartData(attendance.result)
+    if (attendance?.result) {
+      const formattedData = attendance.result.map((item) => ({
+        subject: item.subject,
+        attended: item.attended,
+        total: item.total,
+        percentage: ((item.attended / item.total) * 100).toFixed(2), // Percentage calculation
+      }));
+      setChartData(formattedData);
+    }
   }, [attendance]);
 
   useEffect(() => {
@@ -29,12 +32,6 @@ const Body = () => {
       setLoading(false);
     }
   }, [store.errors]);
-
-  const subjects = useSelector((state) => state.admin.subjects.result);
-
-  useEffect(() => {
-    if (subjects?.length !== 0) setLoading(false);
-  }, [subjects]);
 
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
@@ -47,7 +44,7 @@ const Body = () => {
           <MenuBookIcon />
           <h1>All Subjects</h1>
         </div>
-        <div className=" mr-10 bg-white rounded-xl pt-6 pl-6 h-[29.5rem]">
+        <div className="mr-10 bg-white rounded-xl pt-6 pl-6 h-[29.5rem]">
           <div className="col-span-3 mr-6">
             <div className={classes.loadingAndError}>
               {loading && (
@@ -65,82 +62,29 @@ const Body = () => {
                 </p>
               )}
             </div>
-            {/* {!loading &&
-              Object.keys(error).length === 0 &&
-              subjects?.length !== 0 && (
-                <div className={classes.adminData}>
-                  <div className="grid grid-cols-8">
-                    <h1 className={`${classes.adminDataHeading} col-span-1`}>
-                      Sr no.
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-1`}>
-                      Subject Code
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-2`}>
-                      Subject Name
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-2`}>
-                      Attended
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-1`}>
-                      Total
-                    </h1>
-                    <h1 className={`${classes.adminDataHeading} col-span-1`}>
-                      Percentage
-                    </h1>
-                  </div>
-                  {attendance.result?.map((res, idx) => (
-                    <div
-                      key={idx}
-                      className={`${classes.adminDataBody} grid-cols-8`}>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {idx + 1}
-                      </h1>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {res.subjectCode}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {res.subjectName}
-                      </h1>
-                      <h1
-                        className={`col-span-2 ${classes.adminDataBodyFields}`}>
-                        {attendance.attendedLec[res.subjectCode][0]}
-                      </h1>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {attendance.attendedLec[res.subjectCode][1]}
-                      </h1>
-                      <h1
-                        className={`col-span-1 ${classes.adminDataBodyFields}`}>
-                        {res.percentage ? res.percentage : 0}%
-                      </h1>
-                    </div>
-                  ))}
-                </div>
-              )} */}
             <AgCharts
               options={{
-                title: {
-                  text: "Attendance Summary",
-                },
+                title: { text: "Attendance Summary" },
                 data: chartData,
-                tooltip: {
-                  renderer: function ({ datum }) {
-                    return {
-                      title: datum.subject, // Subject name as the title
-                      content: `${datum.attended}/${datum.total}`, // Show "Attended / Total"
-                    };
-                  },
-                },
+                // tooltip: {
+                //   enabled: true,
+                //   renderer: ({ datum }) => ({
+                //     title: datum.subject,
+                //     content: `Attended: ${datum.attended}/${datum.total} (${datum.percentage}%)`,
+                //   }),
+                // },
                 series: [
                   {
                     type: "bar",
                     xKey: "subject",
                     yKey: "attended",
                     yName: "Attended Lectures",
+                    tooltip: {
+                      renderer: ({ datum }) => ({
+                        title: `${datum.percentage}%`,
+                        data: null,
+                      }),
+                    },
                   },
                 ],
               }}

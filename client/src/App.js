@@ -52,6 +52,8 @@ import ManageSubject from "./components/admin/manageSubject/ManageSubject";
 import UploadResources from "./components/faculty/uploadResources/UploadResources";
 import Resources from "./components/student/resources/Resources";
 import Landing from "./components/login/Landing";
+import Reports from "./components/admin/reports/Reports";
+import ReportPreview from "./components/admin/reports/ReportPreview";
 
 
 const App = () => {
@@ -66,6 +68,8 @@ const App = () => {
       <Route path="/admin/profile" element={<AdminProfile />} />
       <Route path="/admin/update" element={<AdminUpdate />} />
       <Route path="/admin/update/password" element={<AdminPassword />} />
+      <Route path="/admin/reports" element={<Reports />} />
+      <Route path="/admin/previewReport/:id" element={<ReportPreview />} />
       <Route
         path="/admin/updatepassword"
         element={<AdminFirstTimePassword />}

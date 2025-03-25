@@ -6,7 +6,8 @@ import {
   testResult,
   attendance,
   getFiles,
-  downloadFile
+  downloadFile,
+  getStudentDetails
 } from "../controller/studentController.js";
 import auth from "../middleware/auth.js";
 
@@ -19,4 +20,5 @@ router.post("/testresult", auth, testResult);
 router.post("/attendance", auth, attendance);
 router.get("/files", auth, getFiles);
 router.get("/download/:id", auth, downloadFile);
+router.get("/getStudent/:id", auth, getStudentDetails)
 export default router;

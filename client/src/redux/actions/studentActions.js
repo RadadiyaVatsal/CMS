@@ -58,7 +58,7 @@ export const getSubject = (department, year) => async (dispatch) => {
 export const getTestResult =
   (studentId) => async (dispatch) => {
     try {
-      const { data } = await api.getTestResult(studentId);
+      const { data } = await api.getTestResult({studentId});
       dispatch({ type: TEST_RESULT, payload: data.answer });
     } catch (error) {
       dispatch({ type: SET_ERRORS, payload: error.response.data });
@@ -71,7 +71,7 @@ export const getAttendance =
       const { data } = await api.getAttendance({studentId});
       dispatch({ type: ATTENDANCE, payload: data });
     } catch (error) {
-      dispatch({ type: SET_ERRORS, payload: error.response.data });
+      dispatch({ type: SET_ERRORS, payload: error.response?.data || "Error in get attendance" });
     }
   };
 
