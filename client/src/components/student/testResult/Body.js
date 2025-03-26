@@ -29,7 +29,7 @@ const Body = () => {
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
     dispatch(getSubject());
-    dispatch(getTestResult({ studentId: user.result._id }));
+    dispatch(getTestResult(user.result._id ));
     setLoading(false);
   }, []);
 

@@ -34,20 +34,16 @@ const Body = () => {
                 <Data label="Username" value={user.result.username} />
                 <Data label="Department" value={user.result.department} />
                 <Data label="Father's Name" value={user.result.fatherName} />
-                <Data label="Mother's Name" value={user.result.motherName} />
+             
               </div>
               <div className="flex flex-col space-y-10 ">
                 <Data label="DOB" value={user.result.dob} />
-                <Data label="Year" value={user.result.year} />
                 <Data
                   label="Contact Number"
                   value={user.result.contactNumber}
                 />
-                <Data label="Section" value={user.result.section} />
-                <Data
-                  label="Father's Contact Number"
-                  value={user.result.fatherContactNumber}
-                />
+                <Data label="Semester" value={user.result.semester} />
+                
                 <Data label="Batch" value={user.result.batch} />
               </div>
             </div>
