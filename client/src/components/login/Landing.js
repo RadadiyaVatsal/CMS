@@ -1,28 +1,59 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import slicaLogo from "../../utils/Somlalit_Clg_Logo.jpg"; // Ensure correct path
+import "animate.css"; // Using Animate.css for smooth animations
 
 const Landing = () => {
+  const [showContent, setShowContent] = useState(false);
+  const navigate = useNavigate(); // Initialize navigate function
+
+  useEffect(() => {
+    setTimeout(() => {
+      setShowContent(true);
+    }, 500); // Delay content appearance
+  }, []);
+
   return (
-    <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
+    <div className="flex w-screen h-screen bg-gray-100 overflow-hidden">
       {/* Logo Section */}
-      <div style={{ width: "60%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#e5e7eb" }}>
-        <img src={slicaLogo} alt="SLICA Logo" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      <div className="w-2/5 h-full flex items-center justify-center bg-gray-200 animate__animated animate__fadeInLeft">
+        <img src={slicaLogo} alt="SLICA Logo" className="w-full h-full object-cover rounded-xl shadow-lg" />
       </div>
-      
+
       {/* Content Section */}
-      <div style={{ width: "100%", padding: "3rem", display: "flex", flexDirection: "column", justifyContent: "center", background: "linear-gradient(to right, #ffffff, #f3f4f6)", boxShadow: "5px 5px 15px rgba(0,0,0,0.1)", borderRadius: "10px" }}>
-        <h1 style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#1f2937", marginBottom: "1.5rem", textAlign: "center" }}>
-          Som-Lalit Education and Research Foundation
+      <div className={`w-3/5 p-12 flex flex-col justify-center bg-white shadow-xl rounded-lg transition-opacity duration-1000 ${showContent ? "opacity-100" : "opacity-0"}`}>
+        <h1 className="text-4xl font-bold text-gray-800 text-center mb-6 animate__animated animate__fadeInDown">
+          Som-Lalit Institute of Computer Applications
         </h1>
-        <p style={{ fontSize: "1.125rem", color: "#374151", lineHeight: "1.75rem", textAlign: "justify" }}>
-          Som-Lalit Education and Research Foundation is a trust registered under the Societies Act. The academic activities under the aegis of this Trust commenced from August 12, 1996. At present, the following programs are offered by various institutes of this Trust:
+        <p className="text-lg text-gray-600 text-justify mb-6 animate__animated animate__fadeInUp animate__delay-1s">
+          <strong>Note:</strong> This website is for <span className="text-red-500 font-semibold">internal use only</span>. Unauthorized access is prohibited.
         </p>
-        <ul style={{ marginTop: "1.5rem", listStyleType: "none", paddingLeft: "0", color: "#374151", fontSize: "1.125rem", lineHeight: "1.75rem" }}>
-          <li><strong>SLIMS:</strong> 2-year MBA (Master in Business Administration) approved by AICTE and affiliated to GTU.</li>
-          <li><strong>SLICA:</strong> 3-year BCA (Bachelor in Computer Application).</li>
-          <li><strong>SLIBA:</strong> 3-year BBA (Bachelor in Business Administration).</li>
-          <li><strong>SLCC:</strong> 3-year B.Com (Bachelor in Commerce).</li>
-        </ul>
+        <div className="p-6 bg-gray-50 shadow-md rounded-lg animate__animated animate__fadeInUp animate__delay-2s">
+          <ul className="space-y-3 text-gray-700 text-lg">
+            <li><strong>SLIMS:</strong> 2-year MBA (Master in Business Administration) approved by AICTE and affiliated to GTU.</li>
+            <li><strong>SLICA:</strong> 3-year BCA (Bachelor in Computer Application).</li>
+            <li><strong>SLIBA:</strong> 3-year BBA (Bachelor in Business Administration).</li>
+            <li><strong>SLCC:</strong> 3-year B.Com (Bachelor in Commerce).</li>
+          </ul>
+        </div>
+        
+        {/* Student Login Button */}
+        <div className="mt-6 flex justify-center animate__animated animate__zoomIn animate__delay-3s">
+          <button
+            className="px-6 py-3 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg transition-transform transform hover:scale-105"
+            onClick={() => navigate("/login/studentlogin")} // Navigate on button click
+          >
+            Student Login
+          </button>
+        </div>
+
+        {/* Contact Information */}
+        <div className="mt-8 text-center text-gray-600 animate__animated animate__fadeIn animate__delay-4s">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Contact Us</h2>
+          <p className="text-lg">📞 26303301-2-3</p>
+          <p className="text-lg">📧 somlalit@somlalit.org</p>
+          <p className="mt-2 text-gray-500">SLIMS Campus, Nr. St. Xavier’s Corner, University Road, Navrangpura, Ahmedabad-380 009</p>
+        </div>
       </div>
     </div>
   );

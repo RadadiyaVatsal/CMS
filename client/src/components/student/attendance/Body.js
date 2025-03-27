@@ -15,23 +15,27 @@ const Body = () => {
   const store = useSelector((state) => state);
 
   useEffect(() => {
-    if (attendance?.result) {
+    if (attendance?.result && attendance.result.length > 0) {
       const formattedData = attendance.result.map((item) => ({
         subject: item.subject,
         attended: item.attended,
         total: item.total,
-        percentage: ((item.attended / item.total) * 100).toFixed(2), // Percentage calculation
+        percentage: ((item.attended / item.total) * 100).toFixed(2),
       }));
       setChartData(formattedData);
+    } else {
+      setChartData([]); // Ensures no crash on empty data
     }
   }, [attendance]);
 
   useEffect(() => {
-    if (Object.keys(store.errors).length !== 0) {
+    if (store.errors?.noSubjectError && (!attendance?.result || attendance.result.length === 0)) {
       setError(store.errors);
       setLoading(false);
+    } else {
+      setError({});
     }
-  }, [store.errors]);
+  }, [store.errors, attendance]);
 
   useEffect(() => {
     dispatch({ type: SET_ERRORS, payload: {} });
@@ -65,14 +69,9 @@ const Body = () => {
             <AgCharts
               options={{
                 title: { text: "Attendance Summary" },
-                data: chartData,
-                // tooltip: {
-                //   enabled: true,
-                //   renderer: ({ datum }) => ({
-                //     title: datum.subject,
-                //     content: `Attended: ${datum.attended}/${datum.total} (${datum.percentage}%)`,
-                //   }),
-                // },
+                data: chartData.length > 0
+                  ? chartData
+                  : [{ subject: "No Data", attended: 0, total: 1, percentage: "0" }], // Ensures chart never breaks
                 series: [
                   {
                     type: "bar",

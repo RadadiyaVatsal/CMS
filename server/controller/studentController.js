@@ -273,3 +273,19 @@ export const getFiles = async (req, res) => {
     return res.status(500).json({ message: "Fetching failed", error });
   }
 };
+
+
+export const getStudentBatch = async (req, res) => {
+  try {
+    const studentId = req.params.id;
+    const student = await Student.findById(studentId).populate("batch", "name"); // Populate only the batch name
+
+    if (!student || !student.batch) {
+      return res.status(404).json({ message: "Batch not found" });
+    }
+
+    res.json({ batchName: student.batch.name });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+};

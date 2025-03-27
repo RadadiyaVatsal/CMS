@@ -126,14 +126,7 @@ const Body = () => {
               Search
             </Button>
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate("/admin/addstudent")}
-              sx={{ height: 40, width: 140 }}
-            >
-              Add Student
-            </Button>
+            
           </div>
         </form>
 

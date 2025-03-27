@@ -74,42 +74,39 @@ export const updatedPassword = async (req, res) => {
   }
 };
 
+ // Ensure correct import
+
 export const updateFaculty = async (req, res) => {
   try {
-    const { name, dob, department, contactNumber, avatar, email, designation } =
-      req.body;
+    const { name, dob, department, contactNumber, avatar, email, designation } = req.body;
+
+    console.log("Received data:", req.body); // Debugging log
+
+    // Check if faculty exists
     const updatedFaculty = await Faculty.findOne({ email });
-    if (name) {
-      updatedFaculty.name = name;
-      await updatedFaculty.save();
+    // console.log("Here in faculty controller " , updatedFaculty);
+    if (!updatedFaculty) {
+      return res.status(404).json({ backendError: "Faculty not found" });
     }
-    if (dob) {
-      updatedFaculty.dob = dob;
-      await updatedFaculty.save();
-    }
-    if (department) {
-      updatedFaculty.department = department;
-      await updatedFaculty.save();
-    }
-    if (contactNumber) {
-      updatedFaculty.contactNumber = contactNumber;
-      await updatedFaculty.save();
-    }
-    if (designation) {
-      updatedFaculty.designation = designation;
-      await updatedFaculty.save();
-    }
-    if (avatar) {
-      updatedFaculty.avatar = avatar;
-      await updatedFaculty.save();
-    }
+
+    // Update fields only if new values are provided
+    if (name) updatedFaculty.name = name;
+    if (dob) updatedFaculty.dob = dob;
+    if (department) updatedFaculty.department = department;
+    if (contactNumber) updatedFaculty.contactNumber = contactNumber;
+    if (designation) updatedFaculty.designation = designation;
+    if (avatar) updatedFaculty.avatar = avatar;
+
+    // Save only once after all updates
+    await updatedFaculty.save();
+
     res.status(200).json(updatedFaculty);
   } catch (error) {
-    const errors = { backendError: String };
-    errors.backendError = error;
-    res.status(500).json(errors);
+    console.error("Update error:", error); // Log full error for debugging
+    res.status(500).json({ backendError: error.message });
   }
 };
+
 
 export const createTest = async (req, res) => {
   try {

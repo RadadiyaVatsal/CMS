@@ -7,7 +7,7 @@ import {
   attendance,
   getFiles,
   downloadFile,
-  getStudentDetails
+  getStudentDetails,
 } from "../controller/studentController.js";
 import auth from "../middleware/auth.js";
 
