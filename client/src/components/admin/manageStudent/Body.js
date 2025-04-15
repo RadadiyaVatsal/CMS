@@ -103,6 +103,7 @@ const Body = () => {
                   </Select>
                 </div>
                 <Button variant="contained" color="primary" type="submit" sx={{ height: 40, width: 140 }}>Search</Button>
+                <Button variant="contained" color="secondary" onClick={() => navigate("/admin/addstudent")} sx={{ height: 40, width: 140 }}>Add Student</Button>
               </div>
             </form>
 
@@ -141,19 +142,7 @@ const Body = () => {
             </div>
           </div>
         </>
-      ) : (
-        <div className="p-5 border rounded-lg shadow-lg bg-white w-1/3 mx-auto mt-5">
-          <h2 className="text-xl font-bold mb-3">Student Details</h2>
-          <p><strong>Name:</strong> {selectedStudent.name}</p>
-          <p><strong>Semester:</strong> {selectedStudent.semester}</p>
-          <p><strong>Department:</strong> {selectedStudent.department}</p>
-          <p><strong>Batch:</strong> {selectedStudent.batchName}</p>
-          <p><strong>DOB:</strong> {selectedStudent.dob}</p>
-          <p><strong>Contact:</strong> {selectedStudent.contactNumber}</p>
-          <p><strong>Gender:</strong> {selectedStudent.gender}</p>
-          <button onClick={() => setSelectedStudent(null)} className="mt-3 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-700">Close</button>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 };
