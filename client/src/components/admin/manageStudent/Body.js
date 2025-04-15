@@ -72,7 +72,9 @@ const Body = () => {
                   >
                     <MenuItem value="">All</MenuItem>
                     {departments?.map((dp, idx) => (
-                      <MenuItem key={idx} value={dp.department}>{dp.department}</MenuItem>
+                      <MenuItem key={idx} value={dp.department}>
+                        {dp.department}
+                      </MenuItem>
                     ))}
                   </Select>
                 </div>
@@ -85,7 +87,9 @@ const Body = () => {
                   >
                     <MenuItem value="">All</MenuItem>
                     {batches?.map((bt, idx) => (
-                      <MenuItem key={idx} value={bt._id}>{bt.startYear} - {bt.endYear}</MenuItem>
+                      <MenuItem key={idx} value={bt._id}>
+                        {bt.startYear} - {bt.endYear}
+                      </MenuItem>
                     ))}
                   </Select>
                 </div>
@@ -98,51 +102,88 @@ const Body = () => {
                   >
                     <MenuItem value="">All</MenuItem>
                     {[...Array(8)].map((_, i) => (
-                      <MenuItem key={i} value={i + 1}>{i + 1}</MenuItem>
+                      <MenuItem key={i} value={i + 1}>
+                        {i + 1}
+                      </MenuItem>
                     ))}
                   </Select>
                 </div>
-                <Button variant="contained" color="primary" type="submit" sx={{ height: 40, width: 140 }}>Search</Button>
-                <Button variant="contained" color="secondary" onClick={() => navigate("/admin/addstudent")} sx={{ height: 40, width: 140 }}>Add Student</Button>
+                <Button variant="contained" color="primary" type="submit" sx={{ height: 40, width: 140 }}>
+                  Search
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => navigate("/admin/addstudent")}
+                  sx={{ height: 40, width: 140 }}
+                >
+                  Add Student
+                </Button>
               </div>
             </form>
 
-            <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
-              <table className="w-full table-auto border-collapse border border-gray-300">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="border p-2">Sr. No.</th>
-                    <th className="border p-2">Name</th>
-                    <th className="border p-2">Semester</th>
-                    <th className="border p-2">Department</th>
-                    <th className="border p-2">Batch</th>
-                    <th className="border p-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStudents.map((stu, idx) => (
-                    <tr key={idx}>
-                      <td className="border p-2 text-center">{idx + 1}</td>
-                      <td className="border p-2">{stu.name}</td>
-                      <td className="border p-2 text-center">{stu.semester}</td>
-                      <td className="border p-2">{stu.department}</td>
-                      <td className="border p-2">{stu.batchName}</td>
-                      <td className="border p-2 text-center flex justify-center space-x-2">
-                        <IconButton onClick={() => setSelectedStudent(stu)}>
-                          <VisibilityIcon />
-                        </IconButton>
-                        <IconButton onClick={() => handleDelete(stu._id)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            {/* Table Section with Fixed Scroll Issue */}
+            <div className="flex-[0.8] mt-3">
+              <div className="w-full border border-gray-300 rounded-lg shadow-md overflow-hidden">
+                <div className="relative overflow-y-auto max-h-[50vh]">
+                  <table className="w-full table-auto border-collapse border border-gray-300">
+                    <thead className="top-0 bg-gray-100">
+                      <tr>
+                        <th className="border p-2">Sr. No.</th>
+                        <th className="border p-2">Name</th>
+                        <th className="border p-2">Semester</th>
+                        <th className="border p-2">Department</th>
+                        <th className="border p-2">Batch</th>
+                        <th className="border p-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStudents.map((stu, idx) => (
+                        <tr key={idx}>
+                          <td className="border p-2 text-center">{idx + 1}</td>
+                          <td className="border p-2">{stu.name}</td>
+                          <td className="border p-2 text-center">{stu.semester}</td>
+                          <td className="border p-2">{stu.department}</td>
+                          <td className="border p-2">{stu.batchName}</td>
+                          <td className="border p-2 text-center">
+                            <div className="flex justify-center space-x-2">
+                              <IconButton onClick={() => setSelectedStudent(stu)}>
+                                <VisibilityIcon />
+                              </IconButton>
+                              <IconButton onClick={() => handleDelete(stu._id)}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </>
-      ) : null}
+      ) : (
+        <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md mx-auto mt-6">
+          <h2 className="text-xl font-semibold mb-4 text-center">Student Details</h2>
+          <p><strong>Name:</strong> {selectedStudent.name}</p>
+          <p><strong>Department:</strong> {selectedStudent.department}</p>
+          <p><strong>Batch:</strong> {selectedStudent.batchName}</p>
+          <p><strong>Semester:</strong> {selectedStudent.semester}</p>
+          <p><strong>Contact Number:</strong> {selectedStudent.contactNumber}</p>
+          <p><strong>Email:</strong> {selectedStudent.email}</p>
+          <p><strong>Gender:</strong> {selectedStudent.gender}</p>
+          <div className="mt-6 text-center">
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              onClick={() => setSelectedStudent(null)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
